@@ -11,10 +11,14 @@ const config: Config = {
       colors: {
         chalk: '#FAFAF7',
         sand: '#F5F0E8',
+        'sand-dark': '#EDE6D6',
         charcoal: '#1C1C1A',
         forest: '#2D4A3E',
         earth: '#4A3520',
         slate: '#2A3D52',
+        cs: '#3A3A36',
+        muted: '#8C8880',
+        ml: '#B8B4AD',
       },
       fontFamily: {
         serif: ['DM Serif Display', 'Georgia', 'serif'],

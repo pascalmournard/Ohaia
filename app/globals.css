@@ -5,11 +5,23 @@
 :root {
   --chalk: #FAFAF7;
   --sand: #F5F0E8;
+  --sand-dark: #EDE6D6;
   --charcoal: #1C1C1A;
+  --cs: #3A3A36;
+  --muted: #8C8880;
+  --ml: #B8B4AD;
   --forest: #2D4A3E;
   --earth: #4A3520;
   --slate: #2A3D52;
-  --border-color: rgba(28, 28, 26, 0.12);
+  --buyl: #E8F0ED;
+  --barl: #F0EBE3;
+  --givl: #E5ECF4;
+  --border: rgba(28, 28, 26, 0.10);
+  --borderS: rgba(28, 28, 26, 0.18);
+  --border-color: rgba(28, 28, 26, 0.10);
+  --r: 14px;
+  --rs: 8px;
+  --tr: 0.3s cubic-bezier(.4, 0, .2, 1);
 }
 
 @layer base {
@@ -126,4 +138,38 @@
   .page-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+}
+
+/* Utility overrides for reference design system */
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hover card effects for server components */
+.card-lift {
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1), border-color 0.3s cubic-bezier(.4,0,.2,1);
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  border-color: rgba(28,28,26,0.18) !important;
+}
+
+.row-slide {
+  transition: transform 0.26s cubic-bezier(.4,0,.2,1), border-color 0.26s cubic-bezier(.4,0,.2,1), background 0.26s cubic-bezier(.4,0,.2,1);
+}
+.row-slide:hover {
+  transform: translateX(3px);
+  border-color: rgba(28,28,26,0.18) !important;
+}
+
+.conv-item-hover {
+  transition: background 0.22s cubic-bezier(.4,0,.2,1);
+}
+.conv-item-hover:hover {
+  background: var(--sand) !important;
 }

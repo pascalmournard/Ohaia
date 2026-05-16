@@ -7,17 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
-import {
-  ShoppingBag,
-  Repeat2,
-  Gift,
-  Upload,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  Check,
-} from 'lucide-react'
-import { cn, CATEGORIES, CONDITIONS } from '@/lib/utils'
+import { X, Check } from 'lucide-react'
+import { CATEGORIES, CONDITIONS } from '@/lib/utils'
 
 const schema = z.object({
   mode: z.enum(['VENTE', 'TROC', 'DON']),
@@ -43,42 +34,66 @@ const STEPS = [
 const MODE_OPTIONS = [
   {
     value: 'VENTE' as const,
-    icon: ShoppingBag,
-    title: 'Vente',
-    description: 'Vendez vos objets à un prix défini.',
-    bg: 'bg-forest/8',
-    border: 'border-forest/30',
-    activeBg: 'bg-forest',
-    text: 'text-forest',
+    emoji: '🛍️',
+    name: 'Vente',
+    desc: 'Vendez à un prix défini',
+    accent: '#2D4A3E',
+    light: '#E8F0ED',
+    borderActive: 'rgba(45,74,62,0.4)',
+    cssActive: 'active-buy',
   },
   {
     value: 'TROC' as const,
-    icon: Repeat2,
-    title: 'Troc',
-    description: 'Échangez vos objets contre quelque chose qui vous intéresse.',
-    bg: 'bg-earth/8',
-    border: 'border-earth/30',
-    activeBg: 'bg-earth',
-    text: 'text-earth',
+    emoji: '↔️',
+    name: 'Troc',
+    desc: 'Échangez sans argent',
+    accent: '#4A3520',
+    light: '#F0EBE3',
+    borderActive: 'rgba(74,53,32,0.4)',
+    cssActive: 'active-bar',
   },
   {
     value: 'DON' as const,
-    icon: Gift,
-    title: 'Don',
-    description: 'Offrez vos objets gratuitement à quelqu\'un qui en a besoin.',
-    bg: 'bg-slate/8',
-    border: 'border-slate/30',
-    activeBg: 'bg-slate',
-    text: 'text-slate',
+    emoji: '🎁',
+    name: 'Don',
+    desc: 'Offrez gratuitement',
+    accent: '#2A3D52',
+    light: '#E5ECF4',
+    borderActive: 'rgba(42,61,82,0.4)',
+    cssActive: 'active-giv',
   },
 ]
+
+const CONDITIONS_ICONS = ['✨', '👍', '👌', '🔧']
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'var(--chalk)',
+  border: '0.5px solid var(--borderS)',
+  borderRadius: 'var(--rs)',
+  padding: '10px 14px',
+  fontFamily: 'inherit',
+  fontSize: 13,
+  color: 'var(--charcoal)',
+  outline: 'none',
+}
+
+const sectionStyle: React.CSSProperties = {
+  background: 'var(--chalk)',
+  border: '0.5px solid var(--border)',
+  borderRadius: 'var(--r)',
+  padding: '24px 26px',
+  marginBottom: 16,
+}
 
 export default function PublishForm() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [uploading, setUploading] = useState(false)
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [uploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [negotiable, setNegotiable] = useState(false)
 
   const {
     register,
@@ -88,23 +103,26 @@ export default function PublishForm() {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      mode: undefined,
-      images: [],
-    },
+    defaultValues: { mode: undefined, images: [] },
   })
 
   const selectedMode = watch('mode')
-  const images = watch('images')
+  const modeOpt = MODE_OPTIONS.find((m) => m.value === selectedMode)
+  const accent = modeOpt?.accent || '#1C1C1A'
+  const accentLight = modeOpt?.light || 'var(--sand)'
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const newFiles = acceptedFiles.slice(0, 8 - imageFiles.length)
-      setImageFiles((prev) => [...prev, ...newFiles])
       const newUrls = newFiles.map((f) => URL.createObjectURL(f))
-      setValue('images', [...(images || []), ...newUrls])
+      setImageFiles((prev) => [...prev, ...newFiles])
+      setImageUrls((prev) => {
+        const updated = [...prev, ...newUrls]
+        setValue('images', updated)
+        return updated
+      })
     },
-    [imageFiles.length, images, setValue]
+    [imageFiles.length, setValue]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -115,10 +133,12 @@ export default function PublishForm() {
   })
 
   function removeImage(index: number) {
-    const newFiles = imageFiles.filter((_, i) => i !== index)
-    const newUrls = (images || []).filter((_, i) => i !== index)
-    setImageFiles(newFiles)
-    setValue('images', newUrls)
+    setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImageUrls((prev) => {
+      const updated = prev.filter((_, i) => i !== index)
+      setValue('images', updated)
+      return updated
+    })
   }
 
   function canProceed(): boolean {
@@ -127,7 +147,7 @@ export default function PublishForm() {
       const vals = watch()
       return !!(vals.title && vals.description && vals.category && vals.condition)
     }
-    if (step === 3) return (images || []).length > 0
+    if (step === 3) return imageUrls.length > 0
     return true
   }
 
@@ -142,22 +162,16 @@ export default function PublishForm() {
         condition: data.condition,
         price: data.mode === 'VENTE' && data.price ? parseFloat(data.price) : undefined,
         tradeFor: data.mode === 'TROC' ? data.tradeFor : undefined,
-        images: data.images,
+        images: imageUrls,
         city: data.city,
       }
-
       const res = await fetch('/api/annonces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-
       const result = await res.json()
-      if (res.ok && result.id) {
-        router.push(`/annonces/${result.id}`)
-      } else {
-        console.error('Failed to create listing:', result)
-      }
+      if (res.ok && result.id) router.push(`/annonces/${result.id}`)
     } catch (err) {
       console.error('Submit error:', err)
     } finally {
@@ -165,365 +179,469 @@ export default function PublishForm() {
     }
   }
 
-  const modeAccentClass = {
-    VENTE: { btn: 'bg-forest text-white hover:bg-forest/90', bar: 'bg-forest' },
-    TROC: { btn: 'bg-earth text-white hover:bg-earth/90', bar: 'bg-earth' },
-    DON: { btn: 'bg-slate text-white hover:bg-slate/90', bar: 'bg-slate' },
-  }
-
-  const activeAccent = selectedMode
-    ? modeAccentClass[selectedMode]
-    : { btn: 'bg-charcoal text-chalk hover:bg-charcoal/90', bar: 'bg-charcoal' }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto">
-      {/* Progress bar */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-3">
-          {STEPS.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-0">
-              <div className="flex flex-col items-center gap-1.5">
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-[500] border border-thin transition-all',
-                    step === s.id
-                      ? `${activeAccent.bar} text-white border-transparent`
-                      : step > s.id
-                      ? 'bg-charcoal text-chalk border-charcoal'
-                      : 'bg-chalk text-charcoal/40 border-charcoal/15'
-                  )}
-                >
-                  {step > s.id ? <Check size={13} /> : s.id}
-                </div>
-                <span
-                  className={cn(
-                    'text-xs hidden sm:block',
-                    step === s.id ? 'text-charcoal font-[500]' : 'text-charcoal/40'
-                  )}
-                >
-                  {s.label}
-                </span>
-              </div>
-              {i < STEPS.length - 1 && (
-                <div
-                  className={cn(
-                    'flex-1 h-px mx-2 mb-5 transition-colors',
-                    step > s.id ? 'bg-charcoal' : 'bg-charcoal/10'
-                  )}
-                  style={{ width: '60px' }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+    <div style={{ maxWidth: 780, margin: '0 auto', padding: '32px 28px 64px' }}>
+
+      {/* Page header */}
+      <div className="mb-8">
+        <h1 className="font-serif text-[30px] font-[400] text-charcoal mb-1.5" style={{ letterSpacing: '-0.3px' }}>
+          Publier une annonce
+        </h1>
+        <p className="text-[13px] font-[300]" style={{ color: 'var(--muted)' }}>
+          En quelques étapes, votre annonce sera visible par tous.
+        </p>
       </div>
 
-      {/* Step 1: Mode selection */}
-      {step === 1 && (
-        <div className="space-y-4 animate-fade-in">
-          <div className="mb-8">
-            <h2 className="font-serif text-3xl text-charcoal mb-2">Quel type d&apos;annonce ?</h2>
-            <p className="text-sm text-charcoal/50">Choisissez comment vous souhaitez publier votre annonce.</p>
+      {/* ─── STEPPER ─── */}
+      <div className="flex items-center mb-8">
+        {STEPS.map((s, i) => (
+          <div key={s.id} className="flex items-center" style={{ flex: i < STEPS.length - 1 ? 1 : 'none' }}>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-[500] shrink-0 transition-all"
+                style={{
+                  background: step > s.id ? 'var(--charcoal)' : step === s.id ? accent : 'var(--chalk)',
+                  border: step > s.id ? 'none' : step === s.id ? `1.5px solid ${accent}` : '1.5px solid var(--ml)',
+                  color: step >= s.id ? (step === s.id && !modeOpt ? 'var(--charcoal)' : step > s.id || step === s.id ? 'white' : 'var(--ml)') : 'var(--ml)',
+                }}
+              >
+                {step > s.id ? <Check size={11} /> : s.id}
+              </div>
+              <span
+                className="text-[12px] hidden sm:block"
+                style={{
+                  color: step === s.id ? 'var(--charcoal)' : step > s.id ? 'var(--muted)' : 'var(--ml)',
+                  fontWeight: step === s.id ? 500 : 400,
+                }}
+              >
+                {s.label}
+              </span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div
+                className="flex-1 mx-2.5"
+                style={{ height: '0.5px', background: step > s.id ? 'var(--charcoal)' : 'var(--border)', marginBottom: 0 }}
+              />
+            )}
           </div>
-          <div className="grid gap-3">
-            {MODE_OPTIONS.map((option) => {
-              const Icon = option.icon
-              const isSelected = selectedMode === option.value
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setValue('mode', option.value)}
-                  className={cn(
-                    'flex items-center gap-4 p-5 rounded-md border border-thin text-left transition-all',
-                    isSelected
-                      ? `${option.bg} ${option.border} shadow-card`
-                      : 'bg-chalk border-charcoal/12 hover:border-charcoal/25 hover:bg-sand'
-                  )}
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+
+        {/* ─── STEP 1: Mode ─── */}
+        {step === 1 && (
+          <div className="animate-fade-in">
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px] mb-4.5" style={{ color: 'var(--muted)' }}>
+                Type d&apos;annonce
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {MODE_OPTIONS.map((opt) => {
+                  const isSelected = selectedMode === opt.value
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setValue('mode', opt.value)}
+                      className="flex flex-col gap-2 p-5 text-left transition-all duration-200"
+                      style={{
+                        border: isSelected ? `1.5px solid ${opt.accent}` : '0.5px solid var(--borderS)',
+                        borderRadius: 'var(--r)',
+                        background: isSelected ? opt.light : 'var(--chalk)',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--sand)'
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--chalk)'
+                      }}
+                    >
+                      <span className="text-[26px]">{opt.emoji}</span>
+                      <span className="text-[14px] font-[500] text-charcoal">{opt.name}</span>
+                      <span className="text-[11px] leading-[1.4]" style={{ color: 'var(--muted)' }}>{opt.desc}</span>
+                      <div
+                        className="w-[18px] h-[18px] rounded-full flex items-center justify-center self-end mt-1 shrink-0 transition-all"
+                        style={{
+                          border: isSelected ? 'none' : '1.5px solid var(--ml)',
+                          background: isSelected ? opt.accent : 'transparent',
+                        }}
+                      >
+                        {isSelected && <Check size={10} color="white" />}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+              {errors.mode && <p className="text-[11px] text-red-500 mt-3">{errors.mode.message}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* ─── STEP 2: Details ─── */}
+        {step === 2 && (
+          <div className="animate-fade-in">
+            {/* Titre + Description */}
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px] mb-4" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                Informations principales
+              </p>
+
+              <div className="mb-4">
+                <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>Titre</label>
+                <input
+                  {...register('title')}
+                  placeholder="Ex: Vélo de ville en très bon état"
+                  style={inputStyle}
+                  onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = 'var(--charcoal)')}
+                  onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = 'var(--borderS)')}
+                />
+                {errors.title && <p className="text-[11px] text-red-500 mt-1">{errors.title.message}</p>}
+              </div>
+
+              <div className="mb-0">
+                <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>Description</label>
+                <textarea
+                  {...register('description')}
+                  rows={5}
+                  placeholder="Décrivez l'objet, son état, son histoire..."
+                  style={{ ...inputStyle, resize: 'vertical', minHeight: 100, lineHeight: 1.6 }}
+                  onFocus={(e) => ((e.target as HTMLTextAreaElement).style.borderColor = 'var(--charcoal)')}
+                  onBlur={(e) => ((e.target as HTMLTextAreaElement).style.borderColor = 'var(--borderS)')}
+                />
+                {errors.description && <p className="text-[11px] text-red-500 mt-1">{errors.description.message}</p>}
+              </div>
+            </div>
+
+            {/* Category + Condition */}
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px] mb-4" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                Catégorie et état
+              </p>
+
+              <div className="grid grid-cols-2 gap-3.5 mb-4">
+                <div>
+                  <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>Catégorie</label>
+                  <select
+                    {...register('category')}
+                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                    onFocus={(e) => ((e.target as HTMLSelectElement).style.borderColor = 'var(--charcoal)')}
+                    onBlur={(e) => ((e.target as HTMLSelectElement).style.borderColor = 'var(--borderS)')}
+                  >
+                    <option value="">Choisir...</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                  </select>
+                  {errors.category && <p className="text-[11px] text-red-500 mt-1">{errors.category.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>
+                    État <span className="text-[11px] font-[400]" style={{ color: 'var(--ml)' }}>(indicatif)</span>
+                  </label>
+                  <select
+                    {...register('condition')}
+                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                    onFocus={(e) => ((e.target as HTMLSelectElement).style.borderColor = 'var(--charcoal)')}
+                    onBlur={(e) => ((e.target as HTMLSelectElement).style.borderColor = 'var(--borderS)')}
+                  >
+                    <option value="">Choisir...</option>
+                    {CONDITIONS.map((cond) => (
+                      <option key={cond.value} value={cond.value}>{cond.label}</option>
+                    ))}
+                  </select>
+                  {errors.condition && <p className="text-[11px] text-red-500 mt-1">{errors.condition.message}</p>}
+                </div>
+              </div>
+
+              {/* Condition visual grid */}
+              <div className="grid grid-cols-4 gap-2">
+                {CONDITIONS.slice(0, 4).map((cond, i) => {
+                  const watchedCond = watch('condition')
+                  const isSelected = watchedCond === cond.value
+                  return (
+                    <button
+                      key={cond.value}
+                      type="button"
+                      onClick={() => setValue('condition', cond.value)}
+                      className="text-center py-2.5 px-2 transition-all"
+                      style={{
+                        border: isSelected ? `1.5px solid ${accent}` : '0.5px solid var(--borderS)',
+                        borderRadius: 'var(--rs)',
+                        background: isSelected ? accentLight : 'none',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        fontWeight: isSelected ? 500 : 400,
+                      }}
+                    >
+                      <div className="text-[18px] mb-1">{CONDITIONS_ICONS[i]}</div>
+                      <div className="text-[11px]" style={{ color: 'var(--cs)' }}>{cond.label}</div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Price (VENTE) */}
+            {selectedMode === 'VENTE' && (
+              <div style={sectionStyle}>
+                <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                  Prix
+                </p>
+                <div
+                  className="flex items-center overflow-hidden transition-all"
+                  style={{ border: '0.5px solid var(--borderS)', borderRadius: 'var(--rs)' }}
                 >
                   <div
-                    className={cn(
-                      'p-3 rounded-sm flex-shrink-0',
-                      isSelected ? option.bg : 'bg-charcoal/5'
-                    )}
+                    className="flex items-center shrink-0"
+                    style={{ padding: '0 14px', fontSize: 15, color: 'var(--muted)', background: 'var(--sand)', height: 42, borderRight: '0.5px solid var(--borderS)' }}
                   >
-                    <Icon
-                      size={22}
-                      className={isSelected ? option.text : 'text-charcoal/50'}
+                    €
+                  </div>
+                  <input
+                    {...register('price')}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                    style={{ flex: 1, border: 'none', background: 'none', padding: '10px 14px', fontFamily: 'inherit', fontSize: 15, color: 'var(--charcoal)', outline: 'none' }}
+                  />
+                  <div
+                    className="flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    style={{ padding: '0 14px', fontSize: 11, color: 'var(--muted)', height: 42, borderLeft: '0.5px solid var(--borderS)' }}
+                    onClick={() => setNegotiable(!negotiable)}
+                  >
+                    <input type="checkbox" checked={negotiable} onChange={() => setNegotiable(!negotiable)} style={{ accentColor: 'var(--charcoal)', cursor: 'pointer' }} />
+                    Négociable
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Troc exchange */}
+            {selectedMode === 'TROC' && (
+              <div style={{ ...sectionStyle, background: '#F0EBE3', border: '0.5px solid rgba(74,53,32,0.18)' }}>
+                <p className="text-[10px] font-[500] uppercase tracking-[0.6px]" style={{ color: '#4A3520', marginBottom: 14 }}>
+                  Proposition d&apos;échange
+                </p>
+                <div className="grid gap-2.5 mb-3.5" style={{ gridTemplateColumns: '1fr 32px 1fr' }}>
+                  <div className="rounded-[var(--rs)] p-3" style={{ background: 'var(--chalk)', border: '0.5px solid rgba(74,53,32,0.12)' }}>
+                    <p className="text-[10px] uppercase tracking-[0.5px] font-[500] mb-1.5" style={{ color: '#4A3520' }}>Je propose</p>
+                    <p className="text-[13px] font-[500]" style={{ color: 'var(--charcoal)' }}>{watch('title') || '—'}</p>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[14px]" style={{ background: 'var(--chalk)', border: '0.5px solid rgba(74,53,32,0.18)', color: '#4A3520' }}>
+                      ↔
+                    </div>
+                  </div>
+                  <div className="rounded-[var(--rs)] p-3" style={{ background: 'var(--chalk)', border: '0.5px solid rgba(74,53,32,0.12)' }}>
+                    <p className="text-[10px] uppercase tracking-[0.5px] font-[500] mb-1.5" style={{ color: '#4A3520' }}>Je cherche</p>
+                    <input
+                      {...register('tradeFor')}
+                      placeholder="Ex: Livres, appareil photo..."
+                      style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 13, color: 'var(--charcoal)', outline: 'none' }}
                     />
                   </div>
-                  <div className="flex-1">
-                    <p className={cn('font-[500] text-charcoal', isSelected && option.text)}>
-                      {option.title}
-                    </p>
-                    <p className="text-sm text-charcoal/55 mt-0.5">{option.description}</p>
-                  </div>
-                  {isSelected && (
-                    <Check size={18} className={option.text} />
-                  )}
-                </button>
-              )
-            })}
-          </div>
-          {errors.mode && (
-            <p className="text-xs text-red-500">{errors.mode.message}</p>
-          )}
-        </div>
-      )}
-
-      {/* Step 2: Details */}
-      {step === 2 && (
-        <div className="space-y-5 animate-fade-in">
-          <div className="mb-8">
-            <h2 className="font-serif text-3xl text-charcoal mb-2">Décrivez votre annonce</h2>
-            <p className="text-sm text-charcoal/50">Plus votre description est détaillée, plus vous recevrez de réponses.</p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-[500] text-charcoal">Titre</label>
-            <input
-              {...register('title')}
-              placeholder="Ex: Vélo de ville en très bon état"
-              className="input-base"
-            />
-            {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-[500] text-charcoal">Description</label>
-            <textarea
-              {...register('description')}
-              rows={5}
-              placeholder="Décrivez l'objet, son état, son histoire..."
-              className="input-base resize-none"
-            />
-            {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-[500] text-charcoal">Catégorie</label>
-              <select {...register('category')} className="input-base">
-                <option value="">Choisir...</option>
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-              {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-[500] text-charcoal">État</label>
-              <select {...register('condition')} className="input-base">
-                <option value="">Choisir...</option>
-                {CONDITIONS.map((cond) => (
-                  <option key={cond.value} value={cond.value}>
-                    {cond.label}
-                  </option>
-                ))}
-              </select>
-              {errors.condition && <p className="text-xs text-red-500">{errors.condition.message}</p>}
-            </div>
-          </div>
-
-          {selectedMode === 'VENTE' && (
-            <div className="space-y-2">
-              <label className="text-sm font-[500] text-charcoal">Prix (€)</label>
-              <input
-                {...register('price')}
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0"
-                className="input-base"
-              />
-            </div>
-          )}
-
-          {selectedMode === 'TROC' && (
-            <div className="space-y-2">
-              <label className="text-sm font-[500] text-charcoal">Cherche en échange</label>
-              <input
-                {...register('tradeFor')}
-                placeholder="Ex: Livres, appareil photo, vélo..."
-                className="input-base"
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Step 3: Photos */}
-      {step === 3 && (
-        <div className="space-y-5 animate-fade-in">
-          <div className="mb-8">
-            <h2 className="font-serif text-3xl text-charcoal mb-2">Ajoutez des photos</h2>
-            <p className="text-sm text-charcoal/50">Les annonces avec des photos reçoivent 5x plus de réponses.</p>
-          </div>
-
-          {/* Dropzone */}
-          <div
-            {...getRootProps()}
-            className={cn(
-              'border border-thin rounded-md p-8 text-center cursor-pointer transition-colors',
-              isDragActive
-                ? 'border-charcoal/40 bg-charcoal/5'
-                : imageFiles.length >= 8
-                ? 'border-charcoal/10 bg-charcoal/3 cursor-not-allowed opacity-50'
-                : 'border-charcoal/15 bg-sand hover:border-charcoal/30 hover:bg-charcoal/3'
+                </div>
+              </div>
             )}
-          >
-            <input {...getInputProps()} />
-            <Upload size={28} className="text-charcoal/30 mx-auto mb-3" />
-            <p className="text-sm font-[500] text-charcoal/60">
-              {isDragActive
-                ? 'Déposez les photos ici'
-                : imageFiles.length >= 8
-                ? 'Maximum atteint (8 photos)'
-                : 'Glissez vos photos ou cliquez pour en choisir'}
-            </p>
-            <p className="text-xs text-charcoal/35 mt-1">
-              JPEG, PNG ou WebP · Max 8 photos
-            </p>
           </div>
+        )}
 
-          {errors.images && (
-            <p className="text-xs text-red-500">{errors.images.message}</p>
-          )}
+        {/* ─── STEP 3: Photos ─── */}
+        {step === 3 && (
+          <div className="animate-fade-in">
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                Photos
+              </p>
 
-          {/* Preview grid */}
-          {imageFiles.length > 0 && (
-            <div className="grid grid-cols-4 gap-2">
-              {imageFiles.map((file, i) => (
-                <div key={i} className="relative aspect-square rounded-sm overflow-hidden group">
-                  <Image
-                    src={URL.createObjectURL(file)}
-                    alt={`Photo ${i + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                  {i === 0 && (
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-charcoal/70 text-chalk text-[10px] rounded-sm">
-                      Couv.
+              <div
+                {...getRootProps()}
+                className="text-center cursor-pointer transition-all"
+                style={{
+                  border: `1px dashed ${isDragActive ? 'var(--charcoal)' : 'var(--borderS)'}`,
+                  borderRadius: 'var(--r)',
+                  padding: '32px 24px',
+                  background: isDragActive ? 'var(--sand)' : 'var(--chalk)',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--sand)')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--chalk)')}
+              >
+                <input {...getInputProps()} />
+                <div className="text-[28px] mb-2.5">📷</div>
+                <p className="text-[13px] mb-1" style={{ color: 'var(--muted)' }}>
+                  {isDragActive ? 'Déposez les photos ici' : 'Glissez vos photos ou cliquez pour choisir'}
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--ml)' }}>JPEG, PNG ou WebP · Max 8 photos</p>
+              </div>
+
+              {errors.images && <p className="text-[11px] text-red-500 mt-2">{errors.images.message}</p>}
+
+              {imageUrls.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3.5">
+                  {imageUrls.map((url, i) => (
+                    <div
+                      key={i}
+                      className="relative shrink-0"
+                      style={{ width: 68, height: 68, borderRadius: 'var(--rs)', border: '0.5px solid var(--border)', overflow: 'hidden' }}
+                    >
+                      <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" />
+                      {i === 0 && (
+                        <span
+                          className="absolute bottom-0.5 left-0.5 text-[9px] font-[500] px-1.5 py-0.5 text-white"
+                          style={{ background: 'rgba(28,28,26,0.65)', borderRadius: 4 }}
+                        >
+                          Couv.
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-[-6px] right-[-6px] flex items-center justify-center text-white"
+                        style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--charcoal)', border: '1.5px solid var(--chalk)', fontSize: 10, cursor: 'pointer' }}
+                      >
+                        <X size={9} />
+                      </button>
+                    </div>
+                  ))}
+                  {imageUrls.length < 8 && (
+                    <div
+                      {...getRootProps()}
+                      className="flex items-center justify-center cursor-pointer transition-all"
+                      style={{ width: 68, height: 68, borderRadius: 'var(--rs)', border: '1px dashed var(--borderS)', fontSize: 20, color: 'var(--ml)' }}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--sand)')}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
+                    >
+                      <input {...getInputProps()} />
+                      +
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-charcoal/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X size={11} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Step 4: Location + preview */}
-      {step === 4 && (
-        <div className="space-y-5 animate-fade-in">
-          <div className="mb-8">
-            <h2 className="font-serif text-3xl text-charcoal mb-2">Localisation et confirmation</h2>
-            <p className="text-sm text-charcoal/50">Indiquez votre ville pour que les acheteurs locaux puissent vous trouver.</p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-[500] text-charcoal">Ville</label>
-            <input
-              {...register('city')}
-              placeholder="Ex: Paris, Lyon, Marseille..."
-              className="input-base"
-            />
-            {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
-          </div>
-
-          {/* Summary preview */}
-          <div className="card-base p-5 space-y-3">
-            <p className="text-xs uppercase tracking-widest text-charcoal/40">Récapitulatif</p>
-            <div className="flex items-start gap-3">
-              {imageFiles[0] && (
-                <div className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0">
-                  <Image
-                    src={URL.createObjectURL(imageFiles[0])}
-                    alt="Couverture"
-                    fill
-                    className="object-cover"
-                  />
                 </div>
               )}
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span
-                    className={cn(
-                      'text-xs font-[500] px-2 py-0.5 rounded-pill',
-                      selectedMode === 'VENTE' && 'bg-forest text-white',
-                      selectedMode === 'TROC' && 'bg-earth text-white',
-                      selectedMode === 'DON' && 'bg-slate text-white'
-                    )}
-                  >
-                    {selectedMode}
-                  </span>
+            </div>
+
+            {/* Tips */}
+            <div style={{ background: accentLight, border: `0.5px solid ${accent}22`, borderRadius: 'var(--rs)', padding: '14px 16px' }}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.5px] mb-2" style={{ color: accent }}>Conseils</p>
+              <ul className="space-y-1">
+                {['Fond neutre et luminosité naturelle', 'Plusieurs angles pour rassurer', '1ère photo = photo de couverture'].map((tip) => (
+                  <li key={tip} className="flex items-start gap-2 text-[11px]" style={{ color: accent }}>
+                    <span className="shrink-0 mt-0.5">·</span>{tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* ─── STEP 4: Location ─── */}
+        {step === 4 && (
+          <div className="animate-fade-in">
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                Localisation
+              </p>
+              <div
+                className="flex items-center overflow-hidden"
+                style={{ border: '0.5px solid var(--borderS)', borderRadius: 'var(--rs)' }}
+              >
+                <div
+                  className="flex items-center justify-center shrink-0"
+                  style={{ width: 42, height: 42, background: 'var(--sand)', borderRight: '0.5px solid var(--border)', color: 'var(--ml)' }}
+                >
+                  📍
                 </div>
-                <p className="font-[500] text-charcoal">{watch('title') || '—'}</p>
-                <p className="text-xs text-charcoal/50 mt-0.5">
-                  {imageFiles.length} photo{imageFiles.length !== 1 ? 's' : ''} · {watch('city') || '—'}
-                </p>
+                <input
+                  {...register('city')}
+                  placeholder="Paris, Lyon, Marseille..."
+                  style={{ flex: 1, border: 'none', background: 'none', padding: '10px 14px', fontFamily: 'inherit', fontSize: 13, color: 'var(--charcoal)', outline: 'none' }}
+                />
+              </div>
+              {errors.city && <p className="text-[11px] text-red-500 mt-2">{errors.city.message}</p>}
+            </div>
+
+            {/* Preview */}
+            <div style={sectionStyle}>
+              <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
+                Aperçu
+              </p>
+              <div className="flex items-start gap-3">
+                {imageUrls[0] && (
+                  <div style={{ width: 64, height: 64, borderRadius: 'var(--rs)', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                    <Image src={imageUrls[0]} alt="Couverture" fill className="object-cover" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span
+                      className="text-[10px] font-[500] uppercase tracking-[0.4px] px-2 py-0.5 rounded-pill text-white"
+                      style={{ background: accent }}
+                    >
+                      {modeOpt?.name || '—'}
+                    </span>
+                  </div>
+                  <p className="text-[14px] font-[500] text-charcoal truncate">{watch('title') || '—'}</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--muted)' }}>
+                    {imageUrls.length} photo{imageUrls.length !== 1 ? 's' : ''} · {watch('city') || '—'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+        )}
+
+        {/* ─── Navigation ─── */}
+        <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: '0.5px solid var(--border)' }}>
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s - 1)}
+              className="text-[13px] px-5 py-2.5 rounded-pill transition-all"
+              style={{ border: '0.5px solid var(--borderS)', background: 'none', color: 'var(--cs)', cursor: 'pointer', fontFamily: 'inherit' }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--sand)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'none')}
+            >
+              ← Retour
+            </button>
+          ) : <div />}
+
+          {step < 4 ? (
+            <button
+              type="button"
+              onClick={() => { if (canProceed()) setStep((s) => s + 1) }}
+              className="text-[13px] font-[500] px-6 py-2.5 rounded-pill transition-all flex items-center gap-1.5"
+              style={{
+                background: canProceed() ? accent : 'var(--sand)',
+                color: canProceed() ? 'white' : 'var(--muted)',
+                cursor: canProceed() ? 'pointer' : 'not-allowed',
+                border: 'none',
+                fontFamily: 'inherit',
+              }}
+            >
+              Continuer →
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="text-[14px] font-[500] px-8 py-3.5 rounded-pill transition-all flex items-center gap-2"
+              style={{
+                background: submitting ? 'var(--sand)' : accent,
+                color: submitting ? 'var(--muted)' : 'white',
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                border: 'none',
+                fontFamily: 'inherit',
+              }}
+            >
+              {submitting ? 'Publication...' : 'Publier l\'annonce'}
+              {!submitting && <Check size={15} />}
+            </button>
+          )}
         </div>
-      )}
-
-      {/* Navigation buttons */}
-      <div className="flex items-center justify-between mt-10 pt-6 border-t border-thin border-charcoal/8">
-        {step > 1 ? (
-          <button
-            type="button"
-            onClick={() => setStep((s) => s - 1)}
-            className="btn-secondary gap-1.5"
-          >
-            <ChevronLeft size={15} />
-            Retour
-          </button>
-        ) : (
-          <div />
-        )}
-
-        {step < 4 ? (
-          <button
-            type="button"
-            onClick={() => setStep((s) => s + 1)}
-            disabled={!canProceed()}
-            className={cn(
-              'flex items-center gap-1.5 px-6 py-2.5 rounded-pill text-sm font-[500] transition-all',
-              canProceed()
-                ? `${activeAccent.btn}`
-                : 'bg-charcoal/10 text-charcoal/30 cursor-not-allowed'
-            )}
-          >
-            Continuer
-            <ChevronRight size={15} />
-          </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={submitting}
-            className={cn(
-              'flex items-center gap-2 px-8 py-2.5 rounded-pill text-sm font-[500] transition-all',
-              submitting
-                ? 'bg-charcoal/20 text-charcoal/40 cursor-not-allowed'
-                : `${activeAccent.btn}`
-            )}
-          >
-            {submitting ? 'Publication...' : 'Publier l\'annonce'}
-            {!submitting && <Check size={15} />}
-          </button>
-        )}
-      </div>
-    </form>
+      </form>
+    </div>
   )
 }

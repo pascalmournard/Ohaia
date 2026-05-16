@@ -1,131 +1,105 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, Clock } from 'lucide-react'
-import { cn, timeAgo, formatPrice, MODE_CONFIG, getCategoryLabel } from '@/lib/utils'
+import { MapPin } from 'lucide-react'
+import { timeAgo, formatPrice } from '@/lib/utils'
 import type { Listing } from '@/types'
+
+const MODE_ACCENT: Record<string, { color: string; light: string; label: string }> = {
+  VENTE: { color: '#2D4A3E', light: '#E8F0ED', label: 'Vente' },
+  TROC:  { color: '#4A3520', light: '#F0EBE3', label: 'Troc' },
+  DON:   { color: '#2A3D52', light: '#E5ECF4', label: 'Don' },
+}
 
 interface AnnonceCardProps {
   listing: Listing
 }
 
 export default function AnnonceCard({ listing }: AnnonceCardProps) {
-  const mode = MODE_CONFIG[listing.mode]
+  const mode = MODE_ACCENT[listing.mode] ?? MODE_ACCENT.VENTE
   const coverImage = listing.images[0]
 
   return (
-    <Link href={`/annonces/${listing.id}`} className="block group">
-      <article className="card-base card-hover overflow-hidden h-full">
-        {/* Image */}
-        <div className="relative aspect-[4/3] bg-charcoal/5 overflow-hidden">
-          {coverImage ? (
-            <Image
-              src={coverImage}
-              alt={listing.title}
-              fill
-              className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
+    <Link
+      href={`/annonces/${listing.id}`}
+      className="block bg-chalk overflow-hidden card-lift"
+      style={{ border: '0.5px solid var(--border)', borderRadius: 'var(--r)' }}
+    >
+      {/* Image */}
+      <div
+        className="relative flex items-center justify-center overflow-hidden"
+        style={{ aspectRatio: '4/3', background: mode.light }}
+      >
+        {coverImage ? (
+          <Image
+            src={coverImage}
+            alt={listing.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        ) : (
+          <span style={{ fontSize: 36, opacity: 0.2 }}>□</span>
+        )}
+
+        {/* Mode badge */}
+        <span
+          className="absolute top-2.5 left-2.5 text-white text-[10px] font-[500] uppercase tracking-[0.4px] px-2.5 py-1 rounded-pill"
+          style={{ background: mode.color }}
+        >
+          {mode.label}
+        </span>
+
+        {/* Favorite button */}
+        <button
+          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center text-[13px] transition-transform hover:scale-110"
+          style={{ background: 'rgba(250,250,247,0.85)', border: 'none', backdropFilter: 'blur(4px)', cursor: 'pointer' }}
+          onClick={(e) => e.preventDefault()}
+        >
+          ♡
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-3.5">
+        {/* Mode dot + label */}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: mode.color }} />
+          <span className="text-[9px] font-[500] uppercase tracking-[0.4px]" style={{ color: mode.color }}>
+            {mode.label}
+          </span>
+        </div>
+
+        <p className="text-[12px] font-[500] text-charcoal truncate mb-0.5">{listing.title}</p>
+
+        {listing.mode === 'TROC' && listing.tradeFor && (
+          <p className="text-[11px] truncate mb-1.5" style={{ color: 'var(--muted)' }}>
+            ↔ {listing.tradeFor}
+          </p>
+        )}
+
+        <p className="text-[10px] mb-2.5" style={{ color: 'var(--ml)' }}>
+          {listing.city}
+          {listing.createdAt && ` · ${timeAgo(new Date(listing.createdAt))}`}
+        </p>
+
+        <div className="flex items-center justify-between">
+          {listing.mode === 'VENTE' && listing.price != null ? (
+            <span className="font-serif text-[16px] text-charcoal">{formatPrice(listing.price)}</span>
+          ) : listing.mode === 'DON' ? (
+            <span className="text-[12px] font-[500]" style={{ color: mode.color }}>Gratuit</span>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-charcoal/20 text-4xl">○</span>
-            </div>
+            <span className="text-[11px]" style={{ color: 'var(--muted)' }}>Échange</span>
           )}
-
-          {/* Mode badge */}
-          <div className="absolute top-3 left-3">
-            <span
-              className={cn(
-                'inline-flex items-center px-2.5 py-1 text-[11px] font-[500] rounded-pill',
-                listing.mode === 'VENTE' && 'bg-forest text-white',
-                listing.mode === 'TROC' && 'bg-earth text-white',
-                listing.mode === 'DON' && 'bg-slate text-white'
-              )}
-            >
-              {mode.label}
+          {listing.city && (
+            <span className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--ml)' }}>
+              <MapPin size={9} />
+              {listing.city}
             </span>
-          </div>
-
-          {/* Category badge */}
-          <div className="absolute bottom-3 left-3">
-            <span className="inline-flex items-center px-2 py-0.5 text-[11px] rounded-pill bg-chalk/90 text-charcoal/70 backdrop-blur-sm">
-              {getCategoryLabel(listing.category)}
-            </span>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          {/* Title and price */}
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-[0.9375rem] font-[500] text-charcoal leading-snug line-clamp-2 group-hover:text-charcoal/80 transition-colors">
-              {listing.title}
-            </h3>
-            <div className="shrink-0">
-              {listing.mode === 'VENTE' && listing.price != null && (
-                <span className="text-[0.9375rem] font-[500] text-forest">
-                  {formatPrice(listing.price)}
-                </span>
-              )}
-              {listing.mode === 'TROC' && (
-                <span className="text-xs font-[500] text-earth whitespace-nowrap">
-                  Troc
-                </span>
-              )}
-              {listing.mode === 'DON' && (
-                <span className="text-xs font-[500] text-slate">
-                  Gratuit
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Trade info */}
-          {listing.mode === 'TROC' && listing.tradeFor && (
-            <p className="text-xs text-charcoal/50 line-clamp-1">
-              Contre&nbsp;: {listing.tradeFor}
-            </p>
           )}
-
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-1">
-            {/* User */}
-            <div className="flex items-center gap-2 min-w-0">
-              {listing.user.image ? (
-                <Image
-                  src={listing.user.image}
-                  alt={listing.user.name || ''}
-                  width={20}
-                  height={20}
-                  className="rounded-full object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-charcoal/10 flex items-center justify-center shrink-0">
-                  <span className="text-[9px] font-[500] text-charcoal/50">
-                    {listing.user.name?.[0]?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-              )}
-              <span className="text-xs text-charcoal/50 truncate">
-                {listing.user.name || 'Anonyme'}
-              </span>
-            </div>
-
-            {/* Meta */}
-            <div className="flex items-center gap-3 shrink-0">
-              {listing.city && (
-                <span className="flex items-center gap-1 text-xs text-charcoal/40">
-                  <MapPin size={11} />
-                  {listing.city}
-                </span>
-              )}
-              <span className="flex items-center gap-1 text-xs text-charcoal/35">
-                <Clock size={11} />
-                {timeAgo(new Date(listing.createdAt))}
-              </span>
-            </div>
-          </div>
         </div>
-      </article>
+      </div>
     </Link>
   )
 }

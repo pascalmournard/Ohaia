@@ -57,8 +57,8 @@ function HeaderContent() {
         <div className="flex items-center h-16 gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <span className="w-2 h-2 rounded-full bg-forest shrink-0" />
-            <span className="font-serif text-2xl text-charcoal">Ohaia</span>
+            <span className="w-[7px] h-[7px] rounded-full bg-forest shrink-0 transition-colors duration-300" />
+            <span className="font-serif text-[22px] tracking-[-0.3px] text-charcoal">Ohaia</span>
           </Link>
 
           {/* Mode tabs — desktop */}

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { timeAgo, MODE_CONFIG } from '@/lib/utils'
+import { timeAgo } from '@/lib/utils'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -13,25 +13,33 @@ export const metadata: Metadata = {
   description: 'Vos conversations sur Ohaia.',
 }
 
+const MODE_DOT: Record<string, string> = {
+  VENTE: '#2D4A3E',
+  TROC: '#4A3520',
+  DON: '#2A3D52',
+}
+const MODE_LIGHT: Record<string, string> = {
+  VENTE: '#E8F0ED',
+  TROC: '#F0EBE3',
+  DON: '#E5ECF4',
+}
+const MODE_LABEL: Record<string, string> = {
+  VENTE: 'Vente',
+  TROC: 'Troc',
+  DON: 'Don',
+}
+
 async function getConversations(userId: string) {
   try {
     return await prisma.conversation.findMany({
-      where: {
-        participants: { some: { id: userId } },
-      },
+      where: { participants: { some: { id: userId } } },
       include: {
-        participants: {
-          select: { id: true, name: true, image: true },
-        },
-        listing: {
-          select: { id: true, title: true, images: true, mode: true },
-        },
+        participants: { select: { id: true, name: true, image: true } },
+        listing: { select: { id: true, title: true, images: true, mode: true, price: true } },
         messages: {
           orderBy: { createdAt: 'desc' },
           take: 1,
-          include: {
-            sender: { select: { id: true, name: true } },
-          },
+          include: { sender: { select: { id: true, name: true } } },
         },
       },
       orderBy: { updatedAt: 'desc' },
@@ -48,92 +56,211 @@ export default async function MessagesPage() {
   const conversations = await getConversations(session.user.id)
 
   return (
-    <div className="page-container py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[60vh]">
-        {/* Conversations list */}
-        <div className="lg:col-span-1 space-y-4">
-          <h1 className="font-serif text-2xl text-charcoal">Messages</h1>
+    <div
+      className="flex"
+      style={{
+        height: 'calc(100vh - 64px)',
+        minHeight: 560,
+        borderTop: '0.5px solid var(--border)',
+      }}
+    >
+      {/* ─── ICON COLUMN ─── */}
+      <div
+        className="flex flex-col items-center py-4 gap-1 shrink-0"
+        style={{
+          width: 68,
+          borderRight: '0.5px solid var(--border)',
+          background: 'var(--chalk)',
+        }}
+      >
+        {[
+          { icon: '💬', active: true, notif: 3 },
+          { icon: '🔔', active: false, notif: 0 },
+          { icon: '❤️', active: false, notif: 0 },
+          { icon: '📦', active: false, notif: 0 },
+        ].map((b, i) => (
+          <div key={i} className="relative">
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-[var(--rs)] transition-all text-[16px]"
+              style={{
+                border: 'none',
+                background: b.active ? 'var(--charcoal)' : 'none',
+                color: b.active ? 'white' : 'var(--ml)',
+                cursor: 'pointer',
+              }}
+            >
+              {b.icon}
+            </button>
+            {b.notif > 0 && (
+              <span
+                className="absolute top-0.5 right-0.5 flex items-center justify-center text-white font-[500]"
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#E24B4A',
+                  fontSize: 8,
+                  border: '1.5px solid var(--chalk)',
+                }}
+              >
+                {b.notif}
+              </span>
+            )}
+          </div>
+        ))}
+        <div style={{ width: 28, height: '0.5px', background: 'var(--border)', margin: '8px 0' }} />
+        <div className="mt-auto mb-2">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-[500]"
+            style={{ background: '#E8F0ED', color: '#2D4A3E' }}
+          >
+            {session.user.name?.[0]?.toUpperCase() || 'U'}
+          </div>
+        </div>
+      </div>
 
+      {/* ─── CONVERSATIONS LIST ─── */}
+      <div
+        className="flex flex-col shrink-0 overflow-hidden"
+        style={{
+          width: 260,
+          borderRight: '0.5px solid var(--border)',
+          background: 'var(--chalk)',
+        }}
+      >
+        {/* Search */}
+        <div className="p-3" style={{ borderBottom: '0.5px solid var(--border)' }}>
+          <div
+            className="flex items-center gap-2 rounded-pill px-3 py-1.5"
+            style={{ background: 'var(--sand)' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="var(--ml)" strokeWidth="1.5">
+              <circle cx="9" cy="9" r="6" /><path d="m15 15 3 3" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              className="bg-transparent text-[12px] text-charcoal outline-none flex-1 min-w-0"
+              style={{ fontFamily: 'inherit', border: 'none' }}
+            />
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-1 px-3.5 py-2.5" style={{ borderBottom: '0.5px solid var(--border)' }}>
+          {['Tout', 'Vente', 'Troc', 'Don'].map((f, i) => (
+            <button
+              key={f}
+              className="text-[10px] px-2.5 py-1 rounded-pill transition-all"
+              style={{
+                border: '0.5px solid var(--borderS)',
+                background: i === 0 ? 'var(--charcoal)' : 'none',
+                color: i === 0 ? 'white' : 'var(--muted)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
           {conversations.length === 0 ? (
-            <div className="card-base p-8 text-center space-y-3">
-              <p className="font-serif text-xl text-charcoal/30">Aucun message</p>
-              <p className="text-sm text-charcoal/40">
-                Contactez un vendeur pour démarrer une conversation.
+            <div className="p-6 text-center">
+              <p className="font-serif text-[18px] mb-2" style={{ color: 'rgba(28,28,26,0.2)' }}>Aucun message</p>
+              <p className="text-[11px] mb-4" style={{ color: 'var(--muted)' }}>
+                Contactez un vendeur pour démarrer.
               </p>
-              <Link href="/annonces" className="btn-secondary text-sm inline-flex">
-                Explorer les annonces
+              <Link
+                href="/annonces"
+                className="text-[11px] font-[500] px-4 py-2 rounded-pill text-chalk inline-block"
+                style={{ background: 'var(--charcoal)' }}
+              >
+                Explorer
               </Link>
             </div>
           ) : (
-            <div className="space-y-1.5">
-              {conversations.map((conv) => {
-                const otherParticipant = conv.participants.find(
-                  (p) => p.id !== session.user!.id
-                )
-                const lastMessage = conv.messages[0]
-                const mode = conv.listing.mode ? MODE_CONFIG[conv.listing.mode] : null
+            conversations.map((conv) => {
+              const other = conv.participants.find((p) => p.id !== session.user!.id)
+              const lastMsg = conv.messages[0]
+              const mode = conv.listing.mode
 
-                return (
-                  <Link
-                    key={conv.id}
-                    href={`/messages/${conv.id}`}
-                    className="flex items-center gap-3 p-3.5 rounded-md hover:bg-sand transition-colors border border-thin border-transparent hover:border-charcoal/8"
-                  >
-                    {/* Avatar */}
-                    {otherParticipant?.image ? (
-                      <Image
-                        src={otherParticipant.image}
-                        alt={otherParticipant.name || ''}
-                        width={40}
-                        height={40}
-                        className="rounded-full object-cover shrink-0"
-                      />
+              return (
+                <Link
+                  key={conv.id}
+                  href={`/messages/${conv.id}`}
+                  className="flex items-center gap-2.5 px-3.5 py-3 cursor-pointer conv-item-hover"
+                  style={{ borderBottom: '0.5px solid var(--border)' }}
+                >
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    {other?.image ? (
+                      <Image src={other.image} alt={other.name || ''} width={38} height={38} className="rounded-full object-cover" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-charcoal/10 flex items-center justify-center shrink-0">
-                        <span className="text-sm font-[500] text-charcoal/40">
-                          {otherParticipant?.name?.[0]?.toUpperCase() || 'U'}
-                        </span>
+                      <div
+                        className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[13px] font-[500]"
+                        style={{ background: mode ? MODE_LIGHT[mode] : 'var(--sand)', color: mode ? MODE_DOT[mode] : 'var(--muted)' }}
+                      >
+                        {other?.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                     )}
+                    <span
+                      className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full"
+                      style={{ background: '#639922', border: '2px solid var(--chalk)' }}
+                    />
+                  </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-[500] text-charcoal truncate">
-                          {otherParticipant?.name || 'Anonyme'}
-                        </p>
-                        {lastMessage && (
-                          <p className="text-xs text-charcoal/35 shrink-0">
-                            {timeAgo(new Date(lastMessage.createdAt))}
-                          </p>
-                        )}
-                      </div>
-                      <p className="text-xs text-charcoal/50 truncate mt-0.5">
-                        {conv.listing.title}
-                        {mode && (
-                          <span className={`ml-1 ${mode.text}`}>· {mode.label}</span>
-                        )}
-                      </p>
-                      {lastMessage && (
-                        <p className="text-xs text-charcoal/40 truncate mt-0.5">
-                          {lastMessage.sender.id === session.user!.id ? 'Vous: ' : ''}
-                          {lastMessage.content}
-                        </p>
+                  {/* Body */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[13px] text-charcoal font-[500] truncate">{other?.name || 'Anonyme'}</span>
+                      {lastMsg && (
+                        <span className="text-[10px] shrink-0" style={{ color: 'var(--ml)' }}>
+                          {timeAgo(new Date(lastMsg.createdAt))}
+                        </span>
                       )}
                     </div>
-                  </Link>
-                )
-              })}
-            </div>
+                    <p className="text-[11px] truncate mb-1" style={{ color: 'var(--muted)' }}>
+                      {conv.listing.title}
+                    </p>
+                    {lastMsg && (
+                      <p className="text-[11px] truncate" style={{ color: 'var(--muted)' }}>
+                        {lastMsg.sender.id === session.user!.id ? 'Vous : ' : ''}
+                        {lastMsg.content}
+                      </p>
+                    )}
+                    {mode && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[9px] font-[500] px-1.5 py-0.5 rounded-pill uppercase tracking-[0.3px] mt-1"
+                        style={{ background: MODE_LIGHT[mode], color: MODE_DOT[mode] }}
+                      >
+                        {MODE_LABEL[mode]}
+                      </span>
+                    )}
+                  </div>
+
+                  <span
+                    className="w-[7px] h-[7px] rounded-full shrink-0 self-start mt-1.5"
+                    style={{ background: 'var(--charcoal)' }}
+                  />
+                </Link>
+              )
+            })
           )}
         </div>
+      </div>
 
-        {/* Empty state for desktop */}
-        <div className="hidden lg:flex lg:col-span-2 items-center justify-center">
-          <div className="text-center space-y-2">
-            <p className="font-serif text-3xl text-charcoal/15">Sélectionnez une conversation</p>
-            <p className="text-sm text-charcoal/30">Choisissez une conversation dans la liste</p>
-          </div>
+      {/* ─── CHAT AREA ─── */}
+      <div className="flex-1 flex items-center justify-center" style={{ background: 'var(--chalk)' }}>
+        <div className="text-center">
+          <p className="font-serif text-[28px] mb-2" style={{ color: 'rgba(28,28,26,0.12)' }}>
+            Sélectionnez une conversation
+          </p>
+          <p className="text-[13px]" style={{ color: 'var(--ml)' }}>
+            Choisissez une conversation dans la liste
+          </p>
         </div>
       </div>
     </div>

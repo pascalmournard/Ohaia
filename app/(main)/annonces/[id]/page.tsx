@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Star, Calendar, ChevronLeft, ArrowRight } from 'lucide-react'
+import { MapPin, Star, Calendar, ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { cn, timeAgo, formatPrice, MODE_CONFIG, getCategoryLabel, getConditionLabel } from '@/lib/utils'
+import { timeAgo, formatPrice, getCategoryLabel, getConditionLabel } from '@/lib/utils'
 import AnnonceCard from '@/components/annonces/AnnonceCard'
 import ContactButton from '@/components/annonces/ContactButton'
 import type { Metadata } from 'next'
@@ -14,6 +14,12 @@ import type { Listing } from '@/types'
 
 interface PageProps {
   params: { id: string }
+}
+
+const MODE_ACCENT: Record<string, { color: string; light: string; label: string }> = {
+  VENTE: { color: '#2D4A3E', light: '#E8F0ED', label: 'Achat · Vente' },
+  TROC:  { color: '#4A3520', light: '#F0EBE3', label: 'Troc' },
+  DON:   { color: '#2A3D52', light: '#E5ECF4', label: 'Don' },
 }
 
 async function getListing(id: string) {
@@ -67,252 +73,363 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: listing.title,
     description: listing.description.slice(0, 160),
-    openGraph: {
-      images: listing.images[0] ? [listing.images[0]] : [],
-    },
+    openGraph: { images: listing.images[0] ? [listing.images[0]] : [] },
   }
 }
 
 export default async function AnnoncePage({ params }: PageProps) {
-  const [listing, session] = await Promise.all([
-    getListing(params.id),
-    auth(),
-  ])
+  const [listing, session] = await Promise.all([getListing(params.id), auth()])
 
   if (!listing) notFound()
 
   const similarListings = await getSimilarListings(listing)
-  const mode = MODE_CONFIG[listing.mode]
+  const modeStyle = MODE_ACCENT[listing.mode] ?? MODE_ACCENT.VENTE
   const avgRating =
     listing.user.reviewsReceived.length > 0
-      ? listing.user.reviewsReceived.reduce((acc, r) => acc + r.rating, 0) /
-        listing.user.reviewsReceived.length
+      ? listing.user.reviewsReceived.reduce((acc, r) => acc + r.rating, 0) / listing.user.reviewsReceived.length
       : null
   const isOwner = session?.user?.id === listing.userId
 
   return (
-    <div className="page-container py-8">
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 28px 48px' }}>
+
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-charcoal/40 mb-6">
-        <Link href="/annonces" className="hover:text-charcoal transition-colors flex items-center gap-1">
-          <ChevronLeft size={14} />
-          Annonces
-        </Link>
-        <span>/</span>
-        <span className="text-charcoal/70 truncate max-w-xs">{listing.title}</span>
+      <nav className="flex items-center gap-1.5 text-[12px] mb-6" style={{ color: 'var(--muted)' }}>
+        <Link href="/annonces" className="hover:text-charcoal transition-colors">Annonces</Link>
+        <span>›</span>
+        <span className="text-charcoal font-[500] truncate max-w-xs">{listing.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Images + details */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Image gallery */}
-          <div className="space-y-2">
-            <div className="relative aspect-[16/10] rounded-md overflow-hidden bg-sand">
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
+
+        {/* ─── LEFT ─── */}
+        <div>
+          {/* Gallery */}
+          <div className="space-y-1.5">
+            <div
+              className="w-full flex items-center justify-center overflow-hidden"
+              style={{
+                aspectRatio: '4/3',
+                background: modeStyle.light,
+                borderRadius: 'var(--r)',
+                border: '0.5px solid var(--border)',
+              }}
+            >
               {listing.images[0] ? (
                 <Image
                   src={listing.images[0]}
                   alt={listing.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 66vw"
+                  width={700}
+                  height={525}
+                  className="w-full h-full object-cover"
                   priority
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-charcoal/20 text-6xl font-serif">○</span>
-                </div>
+                <span style={{ fontSize: 72, opacity: 0.2 }}>□</span>
               )}
             </div>
             {listing.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {listing.images.slice(1).map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 shrink-0 rounded-sm overflow-hidden">
-                    <Image
-                      src={img}
-                      alt={`${listing.title} ${i + 2}`}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
+              <div className="grid gap-1.5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                {listing.images.slice(1, 5).map((img, i) => (
+                  <div
+                    key={i}
+                    className="overflow-hidden flex items-center justify-center"
+                    style={{
+                      aspectRatio: '1',
+                      background: 'var(--sand)',
+                      borderRadius: 'var(--rs)',
+                      border: '0.5px solid var(--border)',
+                    }}
+                  >
+                    <Image src={img} alt={`${listing.title} ${i + 2}`} width={160} height={160} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Listing details */}
-          <div className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={cn(
-                      'inline-flex items-center px-3 py-1 text-xs font-[500] rounded-pill',
-                      listing.mode === 'VENTE' && 'bg-forest text-white',
-                      listing.mode === 'TROC' && 'bg-earth text-white',
-                      listing.mode === 'DON' && 'bg-slate text-white'
-                    )}
-                  >
-                    {mode.label}
-                  </span>
-                  <span className="text-xs text-charcoal/40 bg-charcoal/5 px-2.5 py-1 rounded-pill">
-                    {getCategoryLabel(listing.category)}
-                  </span>
-                  <span className="text-xs text-charcoal/40 bg-charcoal/5 px-2.5 py-1 rounded-pill">
-                    {getConditionLabel(listing.condition)}
-                  </span>
-                </div>
-                <h1 className="font-serif text-3xl text-charcoal">{listing.title}</h1>
-              </div>
-
-              {listing.mode === 'VENTE' && listing.price != null && (
-                <div className="shrink-0 text-right">
-                  <p className="font-serif text-3xl text-forest">{formatPrice(listing.price)}</p>
-                </div>
+          {/* Content */}
+          <div className="mt-6">
+            {/* Badges */}
+            <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
+              <span
+                className="text-[10px] font-[500] uppercase tracking-[0.4px] px-2.5 py-1 rounded-pill"
+                style={{ background: modeStyle.light, color: modeStyle.color, border: `0.5px solid ${modeStyle.color}33` }}
+              >
+                {modeStyle.label}
+              </span>
+              {listing.condition && (
+                <span
+                  className="text-[10px] font-[500] uppercase tracking-[0.4px] px-2.5 py-1 rounded-pill"
+                  style={{ background: 'var(--sand)', color: 'var(--cs)', border: '0.5px solid var(--borderS)' }}
+                >
+                  {getConditionLabel(listing.condition)}
+                </span>
               )}
-              {listing.mode === 'DON' && (
-                <div className="shrink-0">
-                  <span className="inline-flex items-center px-4 py-2 bg-slate/10 text-slate rounded-pill text-sm font-[500]">
-                    Gratuit
-                  </span>
-                </div>
+              {listing.category && (
+                <span
+                  className="text-[10px] font-[500] uppercase tracking-[0.4px] px-2.5 py-1 rounded-pill"
+                  style={{ background: 'var(--sand)', color: 'var(--cs)', border: '0.5px solid var(--borderS)' }}
+                >
+                  {getCategoryLabel(listing.category)}
+                </span>
               )}
             </div>
 
+            {/* Title */}
+            <h1
+              className="font-serif font-[400] leading-[1.15] mb-2"
+              style={{ fontSize: 28, letterSpacing: '-0.3px' }}
+            >
+              {listing.title}
+            </h1>
+
+            {/* Price (mobile) */}
+            {listing.mode === 'VENTE' && listing.price != null && (
+              <div className="flex items-baseline gap-2.5 mb-1 lg:hidden">
+                <span className="font-serif text-[34px] font-[400] text-charcoal">{formatPrice(listing.price)}</span>
+              </div>
+            )}
+            {listing.mode === 'DON' && (
+              <span className="font-serif text-[28px] font-[400] lg:hidden" style={{ color: modeStyle.color }}>Gratuit</span>
+            )}
+
+            {/* Troc exchange block */}
             {listing.mode === 'TROC' && listing.tradeFor && (
-              <div className="p-4 bg-earth/8 border border-thin border-earth/20 rounded-md">
-                <p className="text-xs font-[500] text-earth/70 uppercase tracking-wider mb-1">Cherche en échange</p>
-                <p className="text-charcoal font-[500]">{listing.tradeFor}</p>
+              <div
+                className="p-4 rounded-[var(--rs)] mb-4"
+                style={{ background: modeStyle.light, border: `0.5px solid ${modeStyle.color}33` }}
+              >
+                <p className="text-[11px] font-[500] uppercase tracking-[0.5px] mb-1" style={{ color: modeStyle.color }}>
+                  Cherche en échange
+                </p>
+                <p className="text-[14px] font-[500] text-charcoal">{listing.tradeFor}</p>
               </div>
             )}
 
-            <div className="flex items-center gap-1.5 text-sm text-charcoal/50">
-              <MapPin size={13} />
-              <span>{listing.city}</span>
-              <span className="mx-1">·</span>
-              <span>{timeAgo(new Date(listing.createdAt))}</span>
+            {/* Meta row */}
+            <div
+              className="flex items-center flex-wrap gap-4 text-[12px] pb-4 mb-4"
+              style={{ color: 'var(--muted)', borderBottom: '0.5px solid var(--border)' }}
+            >
+              {listing.city && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={13} />
+                  {listing.city}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/>
+                </svg>
+                {timeAgo(new Date(listing.createdAt))}
+              </span>
             </div>
 
-            <div className="prose-sm text-charcoal/70 leading-relaxed border-t border-thin border-charcoal/8 pt-4">
-              <p className="whitespace-pre-wrap">{listing.description}</p>
-            </div>
-          </div>
+            {/* Stats boxes */}
+            {listing.mode === 'VENTE' && (
+              <div
+                className="grid gap-2 mb-5"
+                style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+              >
+                {[
+                  { label: 'Catégorie', val: getCategoryLabel(listing.category) },
+                  { label: 'État', val: getConditionLabel(listing.condition), colored: true },
+                  { label: 'Ville', val: listing.city },
+                ].map((s) => (
+                  <div
+                    key={s.label}
+                    className="p-3 rounded-[var(--rs)]"
+                    style={{ background: 'var(--sand)', border: '0.5px solid var(--border)' }}
+                  >
+                    <p className="text-[10px] uppercase tracking-[0.5px] mb-1" style={{ color: 'var(--muted)' }}>{s.label}</p>
+                    <p
+                      className="font-serif text-[16px] font-[400]"
+                      style={{ color: s.colored ? modeStyle.color : 'var(--charcoal)' }}
+                    >
+                      {s.val}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
 
-          {/* Map placeholder */}
-          <div className="border border-thin border-charcoal/10 rounded-md overflow-hidden">
-            <div className="p-4 border-b border-thin border-charcoal/8">
-              <p className="text-sm font-[500] text-charcoal">Localisation</p>
+            {/* Description */}
+            <div className="mb-5">
+              <p
+                className="text-[13px] uppercase tracking-[0.6px] font-[500] mb-2.5"
+                style={{ color: 'var(--charcoal)' }}
+              >
+                Description
+              </p>
+              <p
+                className="text-[13px] leading-[1.7] font-[300] whitespace-pre-wrap"
+                style={{ color: 'var(--cs)' }}
+              >
+                {listing.description}
+              </p>
             </div>
-            <div className="h-48 bg-sand flex items-center justify-center">
-              <div className="text-center space-y-1">
-                <MapPin size={24} className="text-charcoal/25 mx-auto" />
-                <p className="text-sm text-charcoal/40">{listing.city}</p>
+
+            {/* Location */}
+            <div className="mb-5">
+              <p
+                className="text-[13px] uppercase tracking-[0.6px] font-[500] mb-2"
+                style={{ color: 'var(--charcoal)' }}
+              >
+                Localisation
+              </p>
+              <p className="text-[13px] mb-2.5" style={{ color: 'var(--muted)' }}>
+                {listing.city} · remise en main propre
+              </p>
+              <div
+                className="w-full flex items-center justify-center relative overflow-hidden"
+                style={{
+                  height: 120,
+                  background: 'var(--sand)',
+                  borderRadius: 'var(--rs)',
+                  border: '0.5px solid var(--border)',
+                }}
+              >
+                <MapPin size={22} style={{ color: 'var(--ml)', opacity: 0.5 }} />
+                <span
+                  className="absolute bottom-2.5 left-3 text-[11px] px-2 py-0.5 rounded-pill"
+                  style={{ color: 'var(--muted)', background: 'rgba(250,250,247,0.9)' }}
+                >
+                  {listing.city}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: User card + CTA */}
-        <div className="space-y-4">
-          {/* CTA */}
-          {!isOwner && (
-            <div className="card-base p-5 space-y-3">
-              {listing.mode === 'VENTE' && listing.price != null && (
-                <div className="pb-3 border-b border-thin border-charcoal/8">
-                  <p className="font-serif text-2xl text-forest">{formatPrice(listing.price)}</p>
-                </div>
-              )}
+        {/* ─── RIGHT STICKY PANEL ─── */}
+        <div className="lg:sticky lg:top-20">
+          <div
+            className="p-5 flex flex-col gap-3.5"
+            style={{
+              background: 'var(--chalk)',
+              border: '0.5px solid var(--borderS)',
+              borderRadius: 'var(--r)',
+            }}
+          >
+            {/* Price */}
+            {listing.mode === 'VENTE' && listing.price != null && (
+              <div>
+                <p className="font-serif text-[30px] font-[400] text-charcoal">{formatPrice(listing.price)}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--muted)' }}>Prix ferme · Remise en main propre</p>
+              </div>
+            )}
+            {listing.mode === 'DON' && (
+              <div>
+                <p className="font-serif text-[30px] font-[400]" style={{ color: modeStyle.color }}>Gratuit</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--muted)' }}>Don sans contrepartie</p>
+              </div>
+            )}
+            {listing.mode === 'TROC' && (
+              <div>
+                <p className="font-serif text-[22px] font-[400] text-charcoal">Proposition d'échange</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--muted)' }}>Aucun argent échangé</p>
+              </div>
+            )}
+
+            <div style={{ height: '0.5px', background: 'var(--border)' }} />
+
+            {/* CTA buttons */}
+            {!isOwner ? (
               <ContactButton
                 listingId={listing.id}
                 sellerId={listing.userId}
                 isLoggedIn={!!session?.user}
                 mode={listing.mode}
               />
-              {isOwner && (
-                <Link href={`/annonces/${listing.id}/modifier`} className="btn-secondary w-full text-center">
-                  Modifier l&apos;annonce
-                </Link>
-              )}
-            </div>
-          )}
-
-          {isOwner && (
-            <div className="card-base p-5 space-y-3">
-              <p className="text-sm font-[500] text-charcoal">Votre annonce</p>
-              <Link href={`/annonces/${listing.id}/modifier`} className="btn-secondary w-full text-center block">
+            ) : (
+              <Link
+                href={`/annonces/${listing.id}/modifier`}
+                className="block w-full text-center py-3.5 rounded-pill text-[14px] font-[500] transition-all"
+                style={{ background: 'var(--sand)', color: 'var(--charcoal)', border: '0.5px solid var(--borderS)' }}
+              >
                 Modifier l&apos;annonce
               </Link>
-            </div>
-          )}
+            )}
 
-          {/* User card */}
-          <div className="card-base p-5 space-y-4">
-            <div className="flex items-center gap-3">
+            <div style={{ height: '0.5px', background: 'var(--border)' }} />
+
+            {/* Seller */}
+            <Link href={`/profil/${listing.user.id}`} className="flex items-center gap-3 group">
               {listing.user.image ? (
                 <Image
                   src={listing.user.image}
                   alt={listing.user.name || ''}
                   width={44}
                   height={44}
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover shrink-0"
                 />
               ) : (
-                <div className="w-11 h-11 rounded-full bg-charcoal/10 flex items-center justify-center">
-                  <span className="font-serif text-lg text-charcoal/50">
-                    {listing.user.name?.[0]?.toUpperCase() || 'U'}
-                  </span>
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 font-serif text-[16px] font-[500]"
+                  style={{ background: modeStyle.light, color: modeStyle.color }}
+                >
+                  {listing.user.name?.[0]?.toUpperCase() || 'U'}
                 </div>
               )}
-              <div>
-                <p className="font-[500] text-charcoal">{listing.user.name || 'Anonyme'}</p>
-                {listing.user.city && (
-                  <p className="text-xs text-charcoal/50 flex items-center gap-1 mt-0.5">
-                    <MapPin size={11} />
-                    {listing.user.city}
-                  </p>
-                )}
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-[500] text-charcoal">{listing.user.name || 'Utilisateur'}</p>
+                <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                  {listing.user._count.listings} annonce{listing.user._count.listings !== 1 ? 's' : ''}
+                  {avgRating !== null && ` · ★ ${avgRating.toFixed(1)}`}
+                </p>
               </div>
-            </div>
+              <ArrowRight size={14} style={{ color: 'var(--ml)' }} />
+            </Link>
 
-            <div className="flex items-center gap-4 text-sm text-charcoal/50 py-3 border-y border-thin border-charcoal/8">
-              <div className="text-center">
-                <p className="font-[500] text-charcoal text-base">{listing.user._count.listings}</p>
-                <p className="text-xs">annonce{listing.user._count.listings !== 1 ? 's' : ''}</p>
+            {/* Seller stats */}
+            <div className="flex gap-3">
+              <div className="text-center flex-1">
+                <p className="text-[14px] font-[500] text-charcoal">{listing.user._count.listings}</p>
+                <p className="text-[11px]" style={{ color: 'var(--muted)' }}>annonces</p>
               </div>
               {avgRating !== null && (
-                <div className="text-center">
-                  <p className="font-[500] text-charcoal text-base flex items-center gap-1 justify-center">
-                    <Star size={13} className="text-charcoal/60" />
+                <div className="text-center flex-1">
+                  <p className="text-[14px] font-[500] text-charcoal flex items-center justify-center gap-1">
+                    <Star size={12} />
                     {avgRating.toFixed(1)}
                   </p>
-                  <p className="text-xs">{listing.user._count.reviewsReceived} avis</p>
+                  <p className="text-[11px]" style={{ color: 'var(--muted)' }}>{listing.user._count.reviewsReceived} avis</p>
                 </div>
               )}
-              <div className="text-center">
-                <p className="font-[500] text-charcoal text-base flex items-center gap-1 justify-center">
-                  <Calendar size={13} className="text-charcoal/60" />
-                </p>
-                <p className="text-xs">
-                  Depuis {new Date(listing.user.createdAt).getFullYear()}
-                </p>
+              <div className="text-center flex-1">
+                <p className="text-[14px] font-[500] text-charcoal">{new Date(listing.user.createdAt).getFullYear()}</p>
+                <p className="text-[11px]" style={{ color: 'var(--muted)' }}>membre</p>
               </div>
             </div>
 
-            <Link
-              href={`/profil/${listing.user.id}`}
-              className="flex items-center gap-1.5 text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+            <div style={{ height: '0.5px', background: 'var(--border)' }} />
+
+            {/* Safety note */}
+            <div
+              className="p-3 rounded-[var(--rs)] flex items-start gap-2"
+              style={{ background: modeStyle.light }}
             >
-              Voir le profil <ArrowRight size={13} />
-            </Link>
+              <span className="text-[14px] mt-0.5 shrink-0">🛡️</span>
+              <p className="text-[11px] leading-[1.5]" style={{ color: modeStyle.color }}>
+                Ne payez jamais en dehors de la plateforme. Préférez les remises en main propre.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Similar listings */}
       {similarListings.length > 0 && (
-        <section className="mt-16 pt-10 border-t border-thin border-charcoal/8">
-          <h2 className="section-title mb-6">Annonces similaires</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <section
+          className="mt-10 pt-7"
+          style={{ borderTop: '0.5px solid var(--border)' }}
+        >
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="font-serif text-[22px] font-[400] text-charcoal">Annonces similaires</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {similarListings.map((item) => (
               <AnnonceCard key={item.id} listing={item} />
             ))}
