@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Send, ArrowLeft } from 'lucide-react'
-import { pusherClient } from '@/lib/pusher'
+import { pusherClient } from '@/lib/pusher-client'
 import { cn, timeAgo, MODE_CONFIG } from '@/lib/utils'
 import type { Message, ConversationWithMessages } from '@/types'
 
