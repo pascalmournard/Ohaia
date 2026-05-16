@@ -56,11 +56,9 @@ function HeaderContent() {
       <div className="page-container">
         <div className="flex items-center h-16 gap-4">
           {/* Logo */}
-          <Link
-            href="/"
-            className="font-serif text-2xl text-charcoal shrink-0 hover:opacity-80 transition-opacity"
-          >
-            Ohaia
+          <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+            <span className="w-2 h-2 rounded-full bg-forest shrink-0" />
+            <span className="font-serif text-2xl text-charcoal">Ohaia</span>
           </Link>
 
           {/* Mode tabs — desktop */}
