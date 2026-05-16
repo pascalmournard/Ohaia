@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --chalk: #FAFAF7;
+  --sand: #F5F0E8;
+  --charcoal: #1C1C1A;
+  --forest: #2D4A3E;
+  --earth: #4A3520;
+  --slate: #2A3D52;
+  --border-color: rgba(28, 28, 26, 0.12);
+}
+
+@layer base {
+  html {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--chalk);
+    color: var(--charcoal);
+    font-weight: 400;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  * {
+    font-weight: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  ::selection {
+    background-color: rgba(28, 28, 26, 0.1);
+    color: var(--charcoal);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(28, 28, 26, 0.15);
+    border-radius: 100px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(28, 28, 26, 0.25);
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+    font-weight: 400;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  .mode-chip {
+    @apply inline-flex items-center px-3 py-1 text-xs font-[500] rounded-pill border border-thin;
+  }
+
+  .mode-chip-vente {
+    @apply mode-chip bg-forest/10 text-forest border-forest/20;
+  }
+
+  .mode-chip-troc {
+    @apply mode-chip bg-earth/10 text-earth border-earth/20;
+  }
+
+  .mode-chip-don {
+    @apply mode-chip bg-slate/10 text-slate border-slate/20;
+  }
+
+  .card-base {
+    @apply bg-sand border border-thin border-charcoal/10 rounded-md transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover hover:-translate-y-px transition-all duration-200;
+  }
+
+  .input-base {
+    @apply w-full bg-chalk border border-thin border-charcoal/20 rounded-sm px-4 py-2.5 text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:border-charcoal/40 focus:shadow-input-focus transition-all duration-150 text-[0.9375rem];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-charcoal text-chalk text-sm font-[500] rounded-pill hover:bg-charcoal/90 transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-transparent text-charcoal text-sm font-[500] rounded-pill border border-thin border-charcoal/25 hover:bg-charcoal/5 transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-mode-vente {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-forest text-white text-sm font-[500] rounded-pill hover:bg-forest/90 transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-mode-troc {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-earth text-white text-sm font-[500] rounded-pill hover:bg-earth/90 transition-colors duration-150 cursor-pointer;
+  }
+
+  .btn-mode-don {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-slate text-white text-sm font-[500] rounded-pill hover:bg-slate/90 transition-colors duration-150 cursor-pointer;
+  }
+
+  .section-title {
+    @apply font-serif text-3xl text-charcoal;
+  }
+
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
