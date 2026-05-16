@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from 'react'
 import AnnonceFeed from '@/components/annonces/AnnonceFeed'
 import { prisma } from '@/lib/prisma'

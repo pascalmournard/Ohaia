@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { ArrowRight, Repeat2, Gift, ShoppingBag } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
