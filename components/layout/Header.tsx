@@ -34,23 +34,7 @@ function HeaderContent() {
         {/* Left — Logo */}
         <Link href="/" className="hover:opacity-80 transition-opacity shrink-0">
           <span className="font-serif text-[32px] tracking-[-0.5px] text-charcoal">
-            {'Oha'}
-            <span style={{ position: 'relative', display: 'inline-block' }}>
-              {/* dotless i */}
-              &#x131;
-              <span style={{
-                position: 'absolute',
-                top: '0.08em',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '0.22em',
-                height: '0.22em',
-                borderRadius: '50%',
-                background: '#E07A3A',
-                pointerEvents: 'none',
-              }} />
-            </span>
-            {'a'}
+            Ohaia
           </span>
         </Link>
 
