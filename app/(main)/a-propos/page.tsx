@@ -31,7 +31,7 @@ export default function AProposPage() {
             marginBottom: 28,
           }}
         >
-          A propos d&apos;Ohaia
+          À propos d&apos;Ohaia
         </p>
         <h1
           className="font-serif"
@@ -46,7 +46,7 @@ export default function AProposPage() {
           La meilleure production est celle qu&apos;on n&apos;a pas faite.
         </h1>
         <p style={{ fontSize: 15, opacity: 0.5, maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-          Ohaia est une plateforme d&apos;echanges locaux — vente, troc, don — pensee pour que les objets circulent plutot qu&apos;ils ne s&apos;accumulent.
+          Ohaia est une plateforme d&apos;échanges locaux, vente, troc, don, pensée pour que les objets circulent plutôt qu&apos;ils ne s&apos;accumulent.
         </p>
       </section>
 
@@ -66,18 +66,18 @@ export default function AProposPage() {
             Pourquoi trois modes
           </p>
           <h2 className="font-serif" style={{ fontSize: 26, fontWeight: 400, lineHeight: 1.35, marginBottom: 20 }}>
-            Vendre, troquer, donner — trois gestes, une même conviction.
+            Vendre, troquer, donner, trois gestes, une même conviction.
           </h2>
           <p style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--muted)' }}>
             Une plateforme qui ne propose que la vente encourage à tout monnayer. Une plateforme qui ne propose que le don décourage ceux qui ont besoin de récupérer quelque chose en échange. Ohaia réunit les trois parce que chaque situation est différente, et que forcer un seul modèle revient à en exclure une partie des gens.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--muted)', marginTop: 14 }}>
-            Ce qui compte, c&apos;est que l&apos;objet trouve quelqu&apos;un à qui il manquait — peu importe la forme que prend l&apos;échange.
+            Ce qui compte, c&apos;est que l&apos;objet trouve quelqu&apos;un à qui il manquait, peu importe la forme que prend l&apos;échange.
           </p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'var(--border)', border: '0.5px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
           {[
-            { val: '0 €',   label: 'de frais sur les dons' },
+            { val: '0 €',   label: 'de frais sur les dons et le troc' },
             { val: '0',     label: 'publicité, jamais' },
             { val: '100 %', label: 'hébergement européen' },
             { val: '∞',     label: 'objets qui méritent une seconde vie' },
@@ -112,10 +112,10 @@ export default function AProposPage() {
             Camille et Lucas déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu&apos;ils ne veulent pas jeter mais qu&apos;ils n&apos;ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Ohaia est née de cette frustration — et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins.
+            Ohaia est née de cette frustration, et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins et personnes proches.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Le nom vient du basque <em>oiha</em>, qui désigne la forêt — un espace vivant fait d&apos;interdépendances discrètes, où rien ne se perd vraiment.
+            Le nom vient du basque <em>oiha</em>, qui désigne la forêt, un espace vivant fait d&apos;interdépendances naturelles où rien ne se perd vraiment. Coïncidence heureuse, <em>oiha</em> signifie aussi oasis en maori, un lieu de ressource et de passage, un endroit où l&apos;on se retrouve.
           </p>
         </div>
       </section>
@@ -130,7 +130,7 @@ export default function AProposPage() {
             &ldquo;Ce que vous ne voulez plus a peut-être exactement la forme de ce dont quelqu&apos;un d&apos;autre a besoin.&rdquo;
           </p>
           <footer style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            — Camille, cofondatrice
+            Pascal, cofondateur
           </footer>
         </blockquote>
       </section>
@@ -193,12 +193,12 @@ export default function AProposPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
           {[
             {
-              name: 'Camille',
+              name: 'Céline',
               role: 'Cofondatrice, produit',
               why: "Convaincue que la sobriété ne devrait pas demander d'effort.",
             },
             {
-              name: 'Lucas',
+              name: 'Pascal',
               role: 'Cofondateur, technique',
               why: "Croit qu'un bon outil est un outil qu'on oublie d'utiliser tellement il est évident.",
             },
@@ -246,7 +246,7 @@ export default function AProposPage() {
       <section style={{ background: 'var(--sand)', padding: '80px 24px', textAlign: 'center' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <h2 className="font-serif" style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 400, lineHeight: 1.3, marginBottom: 20 }}>
-            Chaque échange sur Ohaia, c&apos;est un objet neuf qu&apos;on n&apos;a pas fabriqué.
+            Chaque échange sur Ohaia, c&apos;est un objet intéressant ou utile qu&apos;on n&apos;a pas fabriqué.
           </h2>
           <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.8, marginBottom: 40 }}>
             On ne prétend pas changer le monde. On essaie juste de rendre un peu plus facile le fait de ne pas l&apos;abîmer.
