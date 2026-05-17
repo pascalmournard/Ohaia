@@ -91,7 +91,8 @@ export default function PublishForm() {
   const [step, setStep] = useState(1)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [uploading] = useState(false)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [negotiable, setNegotiable] = useState(false)
 
@@ -112,15 +113,40 @@ export default function PublishForm() {
   const accentLight = modeOpt?.light || 'var(--sand)'
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[]) => {
       const newFiles = acceptedFiles.slice(0, 8 - imageFiles.length)
-      const newUrls = newFiles.map((f) => URL.createObjectURL(f))
+      if (newFiles.length === 0) return
+
+      // Aperçu local immédiat
+      const previews = newFiles.map((f) => URL.createObjectURL(f))
       setImageFiles((prev) => [...prev, ...newFiles])
+      setImagePreviews((prev) => [...prev, ...previews])
+      setUploading(true)
+
+      // Upload vers Vercel Blob
+      const uploaded: string[] = []
+      for (const file of newFiles) {
+        try {
+          const fd = new FormData()
+          fd.append('file', file)
+          const res = await fetch('/api/upload', { method: 'POST', body: fd })
+          const data = await res.json()
+          if (res.ok && data.url) {
+            uploaded.push(data.url)
+          } else {
+            uploaded.push('')
+          }
+        } catch {
+          uploaded.push('')
+        }
+      }
+
       setImageUrls((prev) => {
-        const updated = [...prev, ...newUrls]
-        setValue('images', updated)
+        const updated = [...prev, ...uploaded]
+        setValue('images', updated.filter(Boolean))
         return updated
       })
+      setUploading(false)
     },
     [imageFiles.length, setValue]
   )
@@ -134,9 +160,10 @@ export default function PublishForm() {
 
   function removeImage(index: number) {
     setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
     setImageUrls((prev) => {
       const updated = prev.filter((_, i) => i !== index)
-      setValue('images', updated)
+      setValue('images', updated.filter(Boolean))
       return updated
     })
   }
@@ -480,15 +507,21 @@ export default function PublishForm() {
 
               {errors.images && <p className="text-[11px] text-red-500 mt-2">{errors.images.message}</p>}
 
-              {imageUrls.length > 0 && (
+              {uploading && (
+                <p className="text-[11px] mt-2 flex items-center gap-1.5" style={{ color: 'var(--muted)' }}>
+                  <span className="animate-spin inline-block">⟳</span> Envoi en cours...
+                </p>
+              )}
+
+              {imagePreviews.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3.5">
-                  {imageUrls.map((url, i) => (
+                  {imagePreviews.map((url, i) => (
                     <div
                       key={i}
                       className="relative shrink-0"
                       style={{ width: 68, height: 68, borderRadius: 'var(--rs)', border: '0.5px solid var(--border)', overflow: 'hidden' }}
                     >
-                      <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" />
+                      <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" unoptimized />
                       {i === 0 && (
                         <span
                           className="absolute bottom-0.5 left-0.5 text-[9px] font-[500] px-1.5 py-0.5 text-white"
@@ -507,7 +540,7 @@ export default function PublishForm() {
                       </button>
                     </div>
                   ))}
-                  {imageUrls.length < 8 && (
+                  {imagePreviews.length < 8 && (
                     <div
                       {...getRootProps()}
                       className="flex items-center justify-center cursor-pointer transition-all"
@@ -570,9 +603,9 @@ export default function PublishForm() {
                 Aperçu
               </p>
               <div className="flex items-start gap-3">
-                {imageUrls[0] && (
+                {imagePreviews[0] && (
                   <div style={{ width: 64, height: 64, borderRadius: 'var(--rs)', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                    <Image src={imageUrls[0]} alt="Couverture" fill className="object-cover" />
+                    <Image src={imagePreviews[0]} alt="Couverture" fill className="object-cover" unoptimized />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -586,7 +619,7 @@ export default function PublishForm() {
                   </div>
                   <p className="text-[14px] font-[500] text-charcoal truncate">{watch('title') || '—'}</p>
                   <p className="text-[12px] mt-0.5" style={{ color: 'var(--muted)' }}>
-                    {imageUrls.length} photo{imageUrls.length !== 1 ? 's' : ''} · {watch('city') || '—'}
+                    {imagePreviews.length} photo{imagePreviews.length !== 1 ? 's' : ''} · {watch('city') || '—'}
                   </p>
                 </div>
               </div>
@@ -627,18 +660,18 @@ export default function PublishForm() {
           ) : (
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || uploading}
               className="text-[14px] font-[500] px-8 py-3.5 rounded-pill transition-all flex items-center gap-2"
               style={{
-                background: submitting ? 'var(--sand)' : accent,
-                color: submitting ? 'var(--muted)' : 'white',
-                cursor: submitting ? 'not-allowed' : 'pointer',
+                background: (submitting || uploading) ? 'var(--sand)' : accent,
+                color: (submitting || uploading) ? 'var(--muted)' : 'white',
+                cursor: (submitting || uploading) ? 'not-allowed' : 'pointer',
                 border: 'none',
                 fontFamily: 'inherit',
               }}
             >
-              {submitting ? 'Publication...' : 'Publier l\'annonce'}
-              {!submitting && <Check size={15} />}
+              {uploading ? 'Photos en cours...' : submitting ? 'Publication...' : 'Publier l\'annonce'}
+              {!submitting && !uploading && <Check size={15} />}
             </button>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import { MapPin } from 'lucide-react'
 import { timeAgo, formatPrice } from '@/lib/utils'
 import type { Listing } from '@/types'
@@ -19,6 +20,7 @@ interface AnnonceCardProps {
 export default function AnnonceCard({ listing }: AnnonceCardProps) {
   const mode = MODE_ACCENT[listing.mode] ?? MODE_ACCENT.VENTE
   const coverImage = listing.images[0]
+  const [imgFailed, setImgFailed] = useState(false)
 
   return (
     <Link
@@ -31,13 +33,14 @@ export default function AnnonceCard({ listing }: AnnonceCardProps) {
         className="relative flex items-center justify-center overflow-hidden"
         style={{ aspectRatio: '4/3', background: mode.light }}
       >
-        {coverImage ? (
+        {coverImage && !imgFailed ? (
           <Image
             src={coverImage}
             alt={listing.title}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            onError={() => setImgFailed(true)}
           />
         ) : (
           <span style={{ fontSize: 36, opacity: 0.2 }}>□</span>
