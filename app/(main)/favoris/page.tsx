@@ -46,7 +46,7 @@ export default async function FavorisPage() {
           <h1 className="font-serif text-[28px] font-[400] text-charcoal mb-1">Mes favoris</h1>
           <p className="text-[13px]" style={{ color: 'var(--muted)' }}>
             {listings.length === 0
-              ? 'Aucun favori pour l&apos;instant'
+              ? "Aucun favori pour l'instant"
               : `${listings.length} annonce${listings.length > 1 ? 's' : ''} sauvegardée${listings.length > 1 ? 's' : ''}`}
           </p>
         </div>
@@ -69,7 +69,7 @@ export default async function FavorisPage() {
           </svg>
           <p className="font-serif text-[20px] mb-2" style={{ color: 'rgba(28,28,26,0.2)' }}>Aucun favori</p>
           <p className="text-[13px] mb-6" style={{ color: 'var(--muted)' }}>
-            Cliquez sur le cœur d&apos;une annonce pour la retrouver ici.
+            {"Cliquez sur le cœur d'une annonce pour la retrouver ici."}
           </p>
           <Link
             href="/annonces"
