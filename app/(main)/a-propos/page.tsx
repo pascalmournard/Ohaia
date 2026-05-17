@@ -115,13 +115,10 @@ export default function AProposPage() {
             Ohaia est née de cette expérience, et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins et personnes proches.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Il y a aussi, dans tout ça, quelque chose qu&apos;on n&apos;attendait pas : le plaisir. Celui de choisir à qui on donne, plutôt que de jeter dans le vide. Celui du troc, qui ressemble à un jeu plus qu&apos;à un marché. Celui de recevoir un objet qui vient de quelqu&apos;un, avec son histoire, son usage.
+            Il y a aussi, dans tout ça, quelque chose qu&apos;on recherchait : le plaisir. Celui de choisir à qui on donne, plutôt que de jeter dans le vide. Celui du troc, qui ressemble à un jeu plus qu&apos;à un marché. Celui de recevoir un objet qui vient de quelqu&apos;un, avec son histoire, son usage.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
             On sort un peu de la notion d&apos;intérêt, de gain. On parle de ce petit mouvement intérieur quand l&apos;échange se passe bien, et qu&apos;on sent qu&apos;on a fait quelque chose de juste. Le don n&apos;est pas une perte, c&apos;est un geste qui crée du lien, et le lien revient, d&apos;une façon ou d&apos;une autre.
-          </p>
-          <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Le nom vient du basque <em>oiha</em>, qui désigne la forêt, un espace vivant fait d&apos;interdépendances naturelles où rien ne se perd vraiment. Coïncidence heureuse, <em>oiha</em> signifie aussi oasis en maori, un lieu de ressource et de passage, un endroit où l&apos;on se retrouve.
           </p>
         </div>
       </section>
