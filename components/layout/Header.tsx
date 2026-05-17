@@ -83,8 +83,9 @@ function HeaderContent() {
               </button>
 
               {userMenuOpen && (
+                <div className="absolute right-0 top-7 w-52 pt-3">
                 <div
-                  className="absolute right-0 top-10 w-52 py-1 animate-fade-in"
+                  className="py-1 animate-fade-in"
                   style={{
                     background: 'var(--chalk)',
                     border: '0.5px solid var(--border)',
@@ -118,6 +119,7 @@ function HeaderContent() {
                   >
                     Se déconnecter
                   </button>
+                </div>
                 </div>
               )}
             </div>
