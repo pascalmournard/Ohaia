@@ -63,9 +63,12 @@ function HeaderContent() {
         {/* Right — Auth */}
         <div className="hidden md:flex items-center gap-2">
           {session?.user ? (
-            <div className="relative">
+            <div
+              className="relative"
+              onMouseEnter={() => setUserMenuOpen(true)}
+              onMouseLeave={() => setUserMenuOpen(false)}
+            >
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 p-0.5 rounded-pill hover:bg-charcoal/5 transition-colors"
               >
                 <Avatar

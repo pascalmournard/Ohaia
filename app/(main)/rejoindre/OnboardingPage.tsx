@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { Loader2, Check, Eye, EyeOff } from 'lucide-react'
@@ -91,10 +91,18 @@ const inputStyle: React.CSSProperties = {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   const [step, setStep] = useState(1)
   const [animKey, setAnimKey] = useState(0)
+  const [accountCreated, setAccountCreated] = useState(false)
+
+  // Redirect if already authenticated before starting onboarding
+  useEffect(() => {
+    if (status === 'authenticated' && !accountCreated) {
+      router.replace('/')
+    }
+  }, [status, accountCreated, router])
 
   // Step 1 — modes
   const [modes, setModes] = useState<Set<Mode>>(new Set())
@@ -163,6 +171,7 @@ export default function OnboardingPage() {
           setLoading(false)
           return
         }
+        setAccountCreated(true)
         const result = await signIn('credentials', { email: email.trim(), password, redirect: false })
         if (result?.error) {
           setError('Compte créé mais connexion échouée. Connectez-vous manuellement.')
