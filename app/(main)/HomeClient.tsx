@@ -7,6 +7,7 @@ import { MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { cn, timeAgo } from '@/lib/utils'
 import type { Listing } from '@/types'
+import LandingPage from '@/components/landing/LandingPage'
 
 type Mode = 'VENTE' | 'TROC' | 'DON'
 
@@ -150,8 +151,11 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Tout')
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const cfg = MODE_CONFIG[mode]
+
+  if (status === 'loading') return null
+  if (!session?.user) return <LandingPage />
 
   const filtered = listings.filter((l) => l.mode === mode)
 
