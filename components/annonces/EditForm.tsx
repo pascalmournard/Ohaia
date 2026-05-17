@@ -395,24 +395,28 @@ export default function EditForm({ listing }: Props) {
                 <div
                   key={i}
                   className="relative shrink-0"
-                  style={{ width: 80, height: 80, borderRadius: 'var(--rs)', border: '0.5px solid var(--border)', overflow: 'hidden' }}
+                  style={{ width: 80, height: 80 }}
                 >
-                  <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" unoptimized />
-                  {i === 0 && (
-                    <span
-                      className="absolute bottom-0.5 left-0.5 text-[9px] font-[500] px-1.5 py-0.5 text-white"
-                      style={{ background: 'rgba(28,28,26,0.65)', borderRadius: 4 }}
-                    >
-                      Couv.
-                    </span>
-                  )}
+                  {/* Image avec clip */}
+                  <div style={{ width: 80, height: 80, borderRadius: 'var(--rs)', border: '0.5px solid var(--border)', overflow: 'hidden', position: 'relative' }}>
+                    <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" unoptimized />
+                    {i === 0 && (
+                      <span
+                        className="absolute bottom-0.5 left-0.5 text-[9px] font-[500] px-1.5 py-0.5 text-white"
+                        style={{ background: 'rgba(28,28,26,0.65)', borderRadius: 4 }}
+                      >
+                        Couv.
+                      </span>
+                    )}
+                  </div>
+                  {/* Bouton × hors du clip */}
                   <button
                     type="button"
                     onClick={() => removeImage(i)}
-                    className="absolute top-[-6px] right-[-6px] flex items-center justify-center text-white"
-                    style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--charcoal)', border: '1.5px solid var(--chalk)', cursor: 'pointer' }}
+                    className="absolute top-[-7px] right-[-7px] flex items-center justify-center text-white"
+                    style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--charcoal)', border: '2px solid var(--chalk)', cursor: 'pointer', zIndex: 10 }}
                   >
-                    <X size={10} />
+                    <X size={9} />
                   </button>
                 </div>
               ))}

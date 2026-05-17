@@ -94,15 +94,15 @@ export default function CitySearch({ defaultValue = '', onSelect, inputStyle, pl
         const { latitude: lat, longitude: lng } = pos.coords
         try {
           const res = await fetch(
-            `https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}&type=municipality`
+            `https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}&limit=1`
           )
           const data = await res.json()
           const f = data.features?.[0]
-          if (f) {
+          if (f && f.properties.city) {
             const result: CityResult = {
               label: `${f.properties.city} (${f.properties.postcode})`,
               city: f.properties.city,
-              postcode: f.properties.postcode,
+              postcode: f.properties.postcode ?? '',
               lat: f.geometry.coordinates[1],
               lng: f.geometry.coordinates[0],
             }
