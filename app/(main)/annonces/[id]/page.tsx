@@ -424,7 +424,7 @@ export default async function AnnoncePage({ params }: PageProps) {
             >
               <span className="text-[14px] mt-0.5 shrink-0">🛡️</span>
               <p className="text-[11px] leading-[1.5]" style={{ color: modeStyle.color }}>
-                Ne payez jamais en dehors de la plateforme. Préférez les remises en main propre.
+                Privilégiez la remise en main propre, c'est plus sûr, et c'est toujours mieux de se rencontrer.
               </p>
             </div>
           </div>
