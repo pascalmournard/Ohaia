@@ -40,11 +40,11 @@ function HeaderContent() {
               &#x131;
               <span style={{
                 position: 'absolute',
-                top: '0.18em',
+                top: '0.08em',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '0.15em',
-                height: '0.15em',
+                width: '0.22em',
+                height: '0.22em',
                 borderRadius: '50%',
                 background: '#E07A3A',
                 pointerEvents: 'none',
