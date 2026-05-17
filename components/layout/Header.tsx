@@ -53,9 +53,8 @@ function HeaderContent() {
 
         {/* Center — Logo */}
         <div className="flex-1 flex justify-center">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: 'var(--forest, #2D4A3E)' }} />
-            <span className="font-serif text-[22px] tracking-[-0.3px] text-charcoal">Ohaia</span>
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <span className="font-serif text-[28px] tracking-[-0.5px] text-charcoal">Ohaia</span>
           </Link>
         </div>
 
