@@ -32,10 +32,35 @@ const STEPS = [
   { id: 4, label: 'Localisation' },
 ]
 
+const IconBuy = ({ color }: { color: string }) => (
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 7h14l-1.8 10H8.8L7 7z" />
+    <path d="M10 7c0-2.2 1.8-4 4-4s4 1.8 4 4" />
+    <circle cx="11" cy="21" r="1.2" fill={color} stroke="none" />
+    <circle cx="17" cy="21" r="1.2" fill={color} stroke="none" />
+  </svg>
+)
+
+const IconBar = ({ color }: { color: string }) => (
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 9h13M5 9l4-4M5 9l4 4" />
+    <path d="M23 19H10M23 19l-4-4M23 19l-4 4" />
+  </svg>
+)
+
+const IconGiv = ({ color }: { color: string }) => (
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 6c0-2 1.5-3 3-3s3 1.5 2 3H14zM14 6c0-2-1.5-3-3-3S8 4.5 9 6h5z" />
+    <rect x="5" y="6" width="18" height="4" rx="2" />
+    <path d="M6 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10" />
+    <line x1="14" y1="10" x2="14" y2="22" />
+  </svg>
+)
+
 const MODE_OPTIONS = [
   {
     value: 'VENTE' as const,
-    emoji: '🛍️',
+    icon: (active: boolean) => <IconBuy color={active ? '#2D4A3E' : '#B8B4AD'} />,
     name: 'Vente',
     desc: 'Vendez à un prix défini',
     accent: '#2D4A3E',
@@ -45,7 +70,7 @@ const MODE_OPTIONS = [
   },
   {
     value: 'TROC' as const,
-    emoji: '↔️',
+    icon: (active: boolean) => <IconBar color={active ? '#4A3520' : '#B8B4AD'} />,
     name: 'Troc',
     desc: 'Échangez sans argent',
     accent: '#4A3520',
@@ -55,7 +80,7 @@ const MODE_OPTIONS = [
   },
   {
     value: 'DON' as const,
-    emoji: '🎁',
+    icon: (active: boolean) => <IconGiv color={active ? '#2A3D52' : '#B8B4AD'} />,
     name: 'Don',
     desc: 'Offrez gratuitement',
     accent: '#2A3D52',
@@ -290,7 +315,7 @@ export default function PublishForm() {
                         if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--chalk)'
                       }}
                     >
-                      <span className="text-[26px]">{opt.emoji}</span>
+                      <span>{opt.icon(isSelected)}</span>
                       <span className="text-[14px] font-[500] text-charcoal">{opt.name}</span>
                       <span className="text-[11px] leading-[1.4]" style={{ color: 'var(--muted)' }}>{opt.desc}</span>
                       <div
