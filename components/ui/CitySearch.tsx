@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { MapPin, Loader2 } from 'lucide-react'
+import { MapPin, Loader2, LocateFixed } from 'lucide-react'
 
 export interface CityResult {
   label: string
@@ -24,6 +24,8 @@ export default function CitySearch({ defaultValue = '', onSelect, inputStyle, pl
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [locating, setLocating] = useState(false)
+  const [locateError, setLocateError] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -80,6 +82,52 @@ export default function CitySearch({ defaultValue = '', onSelect, inputStyle, pl
     if (e.key === 'Escape') setOpen(false)
   }
 
+  async function locateMe() {
+    if (!navigator.geolocation) {
+      setLocateError('Géolocalisation non supportée par votre navigateur.')
+      return
+    }
+    setLocating(true)
+    setLocateError(null)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        try {
+          const res = await fetch(
+            `https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}&type=municipality`
+          )
+          const data = await res.json()
+          const f = data.features?.[0]
+          if (f) {
+            const result: CityResult = {
+              label: `${f.properties.city} (${f.properties.postcode})`,
+              city: f.properties.city,
+              postcode: f.properties.postcode,
+              lat: f.geometry.coordinates[1],
+              lng: f.geometry.coordinates[0],
+            }
+            setQuery(`${result.city} (${result.postcode})`)
+            setSuggestions([])
+            setOpen(false)
+            onSelect(result)
+          } else {
+            setLocateError('Ville non trouvée pour votre position.')
+          }
+        } catch {
+          setLocateError('Erreur lors de la recherche de votre ville.')
+        } finally {
+          setLocating(false)
+        }
+      },
+      (err) => {
+        setLocating(false)
+        if (err.code === 1) setLocateError('Accès à la position refusé.')
+        else setLocateError('Impossible d\'obtenir votre position.')
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    )
+  }
+
   function select(s: CityResult) {
     setQuery(`${s.city} (${s.postcode})`)
     setSuggestions([])
@@ -89,7 +137,8 @@ export default function CitySearch({ defaultValue = '', onSelect, inputStyle, pl
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
-      <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
         <MapPin
           size={14}
           style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--ml)', pointerEvents: 'none' }}
@@ -109,7 +158,47 @@ export default function CitySearch({ defaultValue = '', onSelect, inputStyle, pl
           style={{ ...inputStyle, paddingLeft: 36 }}
           autoComplete="off"
         />
+        </div>
+
+        {/* Bouton Me localiser */}
+        <button
+          type="button"
+          onClick={locateMe}
+          disabled={locating}
+          title="Me localiser automatiquement"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 14px',
+            height: inputStyle?.padding ? undefined : 42,
+            minHeight: 42,
+            borderRadius: 'var(--rs)',
+            border: '0.5px solid var(--borderS)',
+            background: locating ? 'var(--sand)' : 'var(--chalk)',
+            color: locating ? 'var(--ml)' : 'var(--cs)',
+            cursor: locating ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 12,
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={(e) => { if (!locating) (e.currentTarget as HTMLElement).style.background = 'var(--sand)' }}
+          onMouseLeave={(e) => { if (!locating) (e.currentTarget as HTMLElement).style.background = 'var(--chalk)' }}
+        >
+          {locating
+            ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+            : <LocateFixed size={13} />
+          }
+          {locating ? 'Localisation...' : 'Me localiser'}
+        </button>
       </div>
+
+      {locateError && (
+        <p style={{ fontSize: 11, color: '#C03030', marginTop: 4 }}>{locateError}</p>
+      )}
 
       {open && suggestions.length > 0 && (
         <div
