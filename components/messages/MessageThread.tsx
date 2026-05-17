@@ -31,7 +31,7 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
 
   const poll = useCallback(async () => {
     const last = messagesRef.current[messagesRef.current.length - 1]
-    const since = last ? last.createdAt : new Date(0).toISOString()
+    const since = last ? new Date(last.createdAt).toISOString() : new Date(0).toISOString()
     try {
       const res = await fetch(`/api/conversations/${conversation.id}/messages?since=${encodeURIComponent(since)}`)
       if (!res.ok) return
