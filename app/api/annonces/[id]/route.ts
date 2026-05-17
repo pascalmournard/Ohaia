@@ -10,7 +10,7 @@ const updateListingSchema = z.object({
   description: z.string().min(10).max(2000).optional(),
   price: z.number().min(0).optional().nullable(),
   tradeFor: z.string().max(200).optional().nullable(),
-  images: z.array(z.string()).min(1).max(8).optional(),
+  images: z.array(z.string()).max(8).optional(),
   city: z.string().min(1).max(100).optional(),
   status: z.enum(['ACTIVE', 'SOLD', 'RESERVED', 'CLOSED']).optional(),
 })
