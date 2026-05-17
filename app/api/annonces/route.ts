@@ -17,7 +17,7 @@ const createListingSchema = z.object({
   condition: z.enum(['NEUF', 'TRES_BON', 'BON', 'ACCEPTABLE', 'POUR_PIECES']),
   price: z.number().min(0).optional(),
   tradeFor: z.string().max(200).optional(),
-  images: z.array(z.string()).min(1).max(8),
+  images: z.array(z.string()).max(8).optional().default([]),
   city: z.string().min(1).max(100),
   latitude: z.number().optional(),
   longitude: z.number().optional(),

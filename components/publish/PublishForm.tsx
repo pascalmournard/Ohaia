@@ -18,8 +18,8 @@ const schema = z.object({
   condition: z.string().min(1, "Indiquez l'état"),
   price: z.string().optional(),
   tradeFor: z.string().optional(),
-  city: z.string().min(2, 'Indiquez une ville'),
-  images: z.array(z.string()).min(1, 'Ajoutez au moins une photo'),
+  city: z.string().min(1, 'Indiquez une ville'),
+  images: z.array(z.string()).optional().default([]),
 })
 
 type FormData = z.infer<typeof schema>
@@ -147,7 +147,7 @@ export default function PublishForm() {
       const vals = watch()
       return !!(vals.title && vals.description && vals.category && vals.condition)
     }
-    if (step === 3) return imageUrls.length > 0
+    if (step === 3) return true
     return true
   }
 
@@ -544,22 +544,23 @@ export default function PublishForm() {
               <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
                 Localisation
               </p>
-              <div
-                className="flex items-center overflow-hidden"
-                style={{ border: '0.5px solid var(--borderS)', borderRadius: 'var(--rs)' }}
-              >
-                <div
-                  className="flex items-center justify-center shrink-0"
-                  style={{ width: 42, height: 42, background: 'var(--sand)', borderRight: '0.5px solid var(--border)', color: 'var(--ml)' }}
-                >
-                  📍
-                </div>
-                <input
-                  {...register('city')}
-                  placeholder="Paris, Lyon, Marseille..."
-                  style={{ flex: 1, border: 'none', background: 'none', padding: '10px 14px', fontFamily: 'inherit', fontSize: 13, color: 'var(--charcoal)', outline: 'none' }}
-                />
-              </div>
+              <input
+                {...register('city')}
+                placeholder="Ex : Paris, Lyon, Marseille..."
+                style={{
+                  width: '100%',
+                  background: 'var(--chalk)',
+                  border: '0.5px solid var(--borderS)',
+                  borderRadius: 'var(--rs)',
+                  padding: '12px 16px',
+                  fontFamily: 'inherit',
+                  fontSize: 14,
+                  color: 'var(--charcoal)',
+                  outline: 'none',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = 'var(--charcoal)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--borderS)')}
+              />
               {errors.city && <p className="text-[11px] text-red-500 mt-2">{errors.city.message}</p>}
             </div>
 
