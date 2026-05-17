@@ -106,13 +106,19 @@ export default function AProposPage() {
             L&apos;origine
           </p>
           <h2 className="font-serif" style={{ fontSize: 26, fontWeight: 400, lineHeight: 1.35, marginBottom: 24 }}>
-            Des cartons, des livres, et l&apos;envie que ça serve à quelqu&apos;un.
+            Des cartons, des livres, des ustensiles, et l&apos;envie que ça serve à quelqu&apos;un.
           </h2>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)' }}>
-            Céline et Pascal déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu&apos;ils ne veulent pas jeter mais qu&apos;ils n&apos;ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
+            On déménage. On a des livres, des disques, des affaires de cuisine qu&apos;on ne veut pas jeter mais qu&apos;on n&apos;a pas le temps de vendre. On essaie les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. On finit par poser des cartons devant la porte avec un mot manuscrit.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Ohaia est née de cette frustration, et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins et personnes proches.
+            Ohaia est née de cette expérience, et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins et personnes proches.
+          </p>
+          <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
+            Il y a aussi, dans tout ça, quelque chose qu&apos;on n&apos;attendait pas : le plaisir. Celui de choisir à qui on donne, plutôt que de jeter dans le vide. Celui du troc, qui ressemble à un jeu plus qu&apos;à un marché. Celui de recevoir un objet qui vient de quelqu&apos;un, avec son histoire, son usage.
+          </p>
+          <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
+            On sort un peu de la notion d&apos;intérêt, de gain. On parle de ce petit mouvement intérieur quand l&apos;échange se passe bien, et qu&apos;on sent qu&apos;on a fait quelque chose de juste. Le don n&apos;est pas une perte, c&apos;est un geste qui crée du lien, et le lien revient, d&apos;une façon ou d&apos;une autre.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
             Le nom vient du basque <em>oiha</em>, qui désigne la forêt, un espace vivant fait d&apos;interdépendances naturelles où rien ne se perd vraiment. Coïncidence heureuse, <em>oiha</em> signifie aussi oasis en maori, un lieu de ressource et de passage, un endroit où l&apos;on se retrouve.
