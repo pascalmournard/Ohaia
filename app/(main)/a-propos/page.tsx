@@ -4,15 +4,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'À propos — Ohaia',
-  description: 'Pourquoi Ohaia existe, ce en quoi nous croyons, et les personnes derrière la plateforme.',
+  title: 'A propos - Ohaia',
+  description: 'Pourquoi Ohaia existe, ce en quoi nous croyons, et les personnes derriere la plateforme.',
 }
 
 export default function AProposPage() {
   return (
-    <main style={{ background: 'var(--chalk)', color: 'var(--charcoal)' }}>
+    <div style={{ background: 'var(--chalk)', color: 'var(--charcoal)' }}>
 
-      {/* ── 1. Hero ── */}
+      {/* Hero */}
       <section
         style={{
           background: 'var(--charcoal)',
@@ -31,7 +31,7 @@ export default function AProposPage() {
             marginBottom: 28,
           }}
         >
-          À propos d'Ohaia
+          A propos d&apos;Ohaia
         </p>
         <h1
           className="font-serif"
@@ -43,14 +43,14 @@ export default function AProposPage() {
             margin: '0 auto 28px',
           }}
         >
-          La meilleure production est celle qu'on n'a pas faite.
+          La meilleure production est celle qu&apos;on n&apos;a pas faite.
         </h1>
         <p style={{ fontSize: 15, opacity: 0.5, maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-          Ohaia est une plateforme d'échanges locaux — vente, troc, don — pensée pour que les objets circulent plutôt qu'ils ne s'accumulent.
+          Ohaia est une plateforme d&apos;echanges locaux — vente, troc, don — pensee pour que les objets circulent plutot qu&apos;ils ne s&apos;accumulent.
         </p>
       </section>
 
-      {/* ── 2. Manifeste + stats ── */}
+      {/* Manifeste + stats */}
       <section style={{ maxWidth: 880, margin: '0 auto', padding: '80px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
         <div>
           <p
@@ -72,7 +72,7 @@ export default function AProposPage() {
             Une plateforme qui ne propose que la vente encourage à tout monnayer. Une plateforme qui ne propose que le don décourage ceux qui ont besoin de récupérer quelque chose en échange. Ohaia réunit les trois parce que chaque situation est différente, et que forcer un seul modèle revient à en exclure une partie des gens.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--muted)', marginTop: 14 }}>
-            Ce qui compte, c'est que l'objet trouve quelqu'un à qui il manquait — peu importe la forme que prend l'échange.
+            Ce qui compte, c&apos;est que l&apos;objet trouve quelqu&apos;un à qui il manquait — peu importe la forme que prend l&apos;échange.
           </p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'var(--border)', border: '0.5px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
@@ -80,7 +80,7 @@ export default function AProposPage() {
             { val: '0 €',   label: 'de frais sur les dons' },
             { val: '0',     label: 'publicité, jamais' },
             { val: '100 %', label: 'hébergement européen' },
-            { val: '∞',     label: "objets qui méritent une seconde vie" },
+            { val: '∞',     label: 'objets qui méritent une seconde vie' },
           ].map((s) => (
             <div key={s.label} style={{ background: 'var(--chalk)', padding: '28px 20px' }}>
               <p className="font-serif" style={{ fontSize: 30, marginBottom: 6 }}>{s.val}</p>
@@ -90,7 +90,7 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── 3. Histoire fondatrice ── */}
+      {/* Histoire */}
       <section style={{ background: 'var(--sand)', padding: '80px 24px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <p
@@ -103,31 +103,31 @@ export default function AProposPage() {
               marginBottom: 20,
             }}
           >
-            L'origine
+            L&apos;origine
           </p>
           <h2 className="font-serif" style={{ fontSize: 26, fontWeight: 400, lineHeight: 1.35, marginBottom: 24 }}>
-            Des cartons, des livres, et l'envie que ça serve à quelqu'un.
+            Des cartons, des livres, et l&apos;envie que ça serve à quelqu&apos;un.
           </h2>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)' }}>
-            Camille et Lucas déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu'ils ne veulent pas jeter mais qu'ils n'ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
+            Camille et Lucas déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu&apos;ils ne veulent pas jeter mais qu&apos;ils n&apos;ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Ohaia est née de cette frustration — et de l'idée qu'il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins.
+            Ohaia est née de cette frustration — et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
-            Le nom vient du basque <em>oiha</em>, qui désigne la forêt — un espace vivant fait d'interdépendances discrètes, où rien ne se perd vraiment.
+            Le nom vient du basque <em>oiha</em>, qui désigne la forêt — un espace vivant fait d&apos;interdépendances discrètes, où rien ne se perd vraiment.
           </p>
         </div>
       </section>
 
-      {/* ── 4. Pull quote ── */}
+      {/* Pull quote */}
       <section style={{ padding: '80px 24px', textAlign: 'center' }}>
         <blockquote style={{ maxWidth: 640, margin: '0 auto' }}>
           <p
             className="font-serif"
             style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 400, lineHeight: 1.4, color: 'var(--charcoal)', marginBottom: 20 }}
           >
-            "Ce que vous ne voulez plus a peut-être exactement la forme de ce dont quelqu'un d'autre a besoin."
+            &ldquo;Ce que vous ne voulez plus a peut-être exactement la forme de ce dont quelqu&apos;un d&apos;autre a besoin.&rdquo;
           </p>
           <footer style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             — Camille, cofondatrice
@@ -135,7 +135,7 @@ export default function AProposPage() {
         </blockquote>
       </section>
 
-      {/* ── 5. Engagements ── */}
+      {/* Engagements */}
       <section style={{ background: 'var(--charcoal)', color: 'var(--chalk)', padding: '80px 24px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <p
@@ -155,15 +155,15 @@ export default function AProposPage() {
             {[
               {
                 title: 'Pas de publicité.',
-                body: 'Jamais. Pas de bannières, pas de ciblage, pas de données vendues à des annonceurs. Le modèle économique repose sur une commission réduite sur les ventes, et rien d'autre.',
+                body: "Jamais. Pas de bannières, pas de ciblage, pas de données vendues à des annonceurs. Le modèle économique repose sur une commission réduite sur les ventes, et rien d'autre.",
               },
               {
-                title: 'Pas d'algorithme de rétention.',
-                body: 'Ohaia ne cherche pas à vous garder le plus longtemps possible. Vous venez, vous trouvez ce qu'il vous faut, vous partez. C'est tout.',
+                title: "Pas d'algorithme de rétention.",
+                body: "Ohaia ne cherche pas à vous garder le plus longtemps possible. Vous venez, vous trouvez ce qu'il vous faut, vous partez. C'est tout.",
               },
               {
                 title: 'Des frais transparents.',
-                body: 'Les dons sont gratuits. Les échanges sont gratuits. Une petite commission s'applique uniquement sur les ventes, clairement affichée avant toute transaction.',
+                body: "Les dons sont gratuits. Les échanges sont gratuits. Une petite commission s'applique uniquement sur les ventes, clairement affichée avant toute transaction.",
               },
             ].map((e) => (
               <div key={e.title}>
@@ -175,7 +175,7 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── 6. Équipe ── */}
+      {/* Equipe */}
       <section style={{ maxWidth: 760, margin: '0 auto', padding: '80px 24px' }}>
         <p
           style={{
@@ -188,24 +188,24 @@ export default function AProposPage() {
             textAlign: 'center',
           }}
         >
-          L'équipe
+          L&apos;équipe
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
           {[
             {
               name: 'Camille',
               role: 'Cofondatrice, produit',
-              why: 'Convaincue que la sobriété ne devrait pas demander d'effort.',
+              why: "Convaincue que la sobriété ne devrait pas demander d'effort.",
             },
             {
               name: 'Lucas',
               role: 'Cofondateur, technique',
-              why: 'Croit qu'un bon outil est un outil qu'on oublie d'utiliser tellement il est évident.',
+              why: "Croit qu'un bon outil est un outil qu'on oublie d'utiliser tellement il est évident.",
             },
             {
               name: 'Idir',
               role: 'Design & expérience',
-              why: 'Pense que la forme d'une interface dit quelque chose sur les valeurs de ceux qui l'ont faite.',
+              why: "Pense que la forme d'une interface dit quelque chose sur les valeurs de ceux qui l'ont faite.",
             },
           ].map((p) => (
             <div
@@ -242,14 +242,14 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── 7. Impact + CTA ── */}
+      {/* Impact + CTA */}
       <section style={{ background: 'var(--sand)', padding: '80px 24px', textAlign: 'center' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <h2 className="font-serif" style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 400, lineHeight: 1.3, marginBottom: 20 }}>
-            Chaque échange sur Ohaia, c'est un objet neuf qu'on n'a pas fabriqué.
+            Chaque échange sur Ohaia, c&apos;est un objet neuf qu&apos;on n&apos;a pas fabriqué.
           </h2>
           <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.8, marginBottom: 40 }}>
-            On ne prétend pas changer le monde. On essaie juste de rendre un peu plus facile le fait de ne pas l'abîmer.
+            On ne prétend pas changer le monde. On essaie juste de rendre un peu plus facile le fait de ne pas l&apos;abîmer.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link
@@ -285,6 +285,6 @@ export default function AProposPage() {
         </div>
       </section>
 
-    </main>
+    </div>
   )
 }
