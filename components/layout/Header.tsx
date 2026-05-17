@@ -99,6 +99,7 @@ function HeaderContent() {
                   {[
                     { href: `/profil/${session.user.id}`, label: 'Mon profil' },
                     { href: '/messages', label: 'Messages' },
+                    { href: '/favoris', label: 'Mes favoris' },
                     { href: '/publier', label: 'Publier une annonce' },
                   ].map((item) => (
                     <Link
@@ -174,6 +175,7 @@ function HeaderContent() {
                 <>
                   <Link href={`/profil/${session.user.id}`} onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Mon profil</Link>
                   <Link href="/messages" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Messages</Link>
+                  <Link href="/favoris" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Mes favoris</Link>
                   <button onClick={() => { signOut(); setMobileOpen(false) }} className="text-[13px] text-left py-2" style={{ color: 'var(--muted)' }}>
                     Se déconnecter
                   </button>

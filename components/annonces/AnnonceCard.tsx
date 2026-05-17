@@ -15,12 +15,39 @@ const MODE_ACCENT: Record<string, { color: string; light: string; label: string 
 
 interface AnnonceCardProps {
   listing: Listing
+  initialFavorited?: boolean
 }
 
-export default function AnnonceCard({ listing }: AnnonceCardProps) {
+export default function AnnonceCard({ listing, initialFavorited = false }: AnnonceCardProps) {
   const mode = MODE_ACCENT[listing.mode] ?? MODE_ACCENT.VENTE
   const coverImage = listing.images[0]
   const [imgFailed, setImgFailed] = useState(false)
+  const [favorited, setFavorited] = useState(initialFavorited)
+  const [loading, setLoading] = useState(false)
+
+  async function toggleFavorite(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (loading) return
+    setLoading(true)
+    const next = !favorited
+    setFavorited(next)
+    try {
+      if (next) {
+        await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingId: listing.id }),
+        })
+      } else {
+        await fetch(`/api/favorites/${listing.id}`, { method: 'DELETE' })
+      }
+    } catch {
+      setFavorited(!next)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Link
@@ -56,17 +83,30 @@ export default function AnnonceCard({ listing }: AnnonceCardProps) {
 
         {/* Favorite button */}
         <button
-          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center text-[13px] transition-transform hover:scale-110"
-          style={{ background: 'rgba(250,250,247,0.85)', border: 'none', backdropFilter: 'blur(4px)', cursor: 'pointer' }}
-          onClick={(e) => e.preventDefault()}
+          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+          style={{
+            background: 'rgba(250,250,247,0.85)',
+            backdropFilter: 'blur(4px)',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+          onClick={toggleFavorite}
+          title={favorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
-          ♡
+          {favorited ? (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#E24B4A" stroke="#E24B4A" strokeWidth="1.5">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          ) : (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--charcoal)', opacity: 0.5 }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          )}
         </button>
       </div>
 
       {/* Body */}
       <div className="p-3.5">
-        {/* Mode dot + label */}
         <div className="flex items-center gap-1.5 mb-1.5">
           <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: mode.color }} />
           <span className="text-[9px] font-[500] uppercase tracking-[0.4px]" style={{ color: mode.color }}>
