@@ -9,8 +9,8 @@ import { auth } from '@/lib/auth'
 import { timeAgo, formatPrice, getCategoryLabel, getConditionLabel } from '@/lib/utils'
 import AnnonceCard from '@/components/annonces/AnnonceCard'
 import ContactButton from '@/components/annonces/ContactButton'
-import dynamic from 'next/dynamic'
-const ListingMap = dynamic(() => import('@/components/ui/ListingMap'), { ssr: false })
+import dynamicImport from 'next/dynamic'
+const ListingMap = dynamicImport(() => import('@/components/ui/ListingMap'), { ssr: false })
 import type { Metadata } from 'next'
 import type { Listing } from '@/types'
 
