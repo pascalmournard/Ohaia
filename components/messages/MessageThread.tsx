@@ -83,7 +83,7 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
   }
 
   const listing = conversation.listing
-  const mode = listing.mode
+  const listingMode = listing.mode
   const MODE_COLOR: Record<string, string> = { VENTE: '#2D4A3E', TROC: '#4A3520', DON: '#2A3D52' }
   const MODE_LIGHT: Record<string, string> = { VENTE: '#E8F0ED', TROC: '#F0EBE3', DON: '#E5ECF4' }
   const MODE_LABEL: Record<string, string> = { VENTE: 'Vente',   TROC: 'Troc',    DON: 'Don'    }
@@ -260,15 +260,15 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
           {listing.images[0] ? (
             <Image src={listing.images[0]} alt={listing.title} fill className="object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center" style={{ background: MODE_LIGHT[mode] }}>
+            <div className="w-full h-full flex items-center justify-center" style={{ background: MODE_LIGHT[listingMode] }}>
               <span style={{ fontSize: 36, opacity: 0.3 }}>□</span>
             </div>
           )}
           <span
             className="absolute top-3 left-3 text-[9px] font-[500] uppercase tracking-[0.4px] px-2 py-1 rounded-pill"
-            style={{ background: MODE_COLOR[mode], color: 'white' }}
+            style={{ background: MODE_COLOR[listingMode], color: 'white' }}
           >
-            {MODE_LABEL[mode]}
+            {MODE_LABEL[listingMode]}
           </span>
         </Link>
 
@@ -276,10 +276,10 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
         <div className="p-4 flex-1">
           <Link href={`/annonces/${listing.id}`} className="block mb-3">
             <p className="text-[14px] font-[500] text-charcoal leading-snug mb-1">{listing.title}</p>
-            {mode === 'VENTE' && listing.price != null ? (
+            {listingMode === 'VENTE' && listing.price != null ? (
               <p className="font-serif text-[20px] text-charcoal">{listing.price.toLocaleString('fr-FR')} €</p>
-            ) : mode === 'DON' ? (
-              <p className="text-[13px] font-[500]" style={{ color: MODE_COLOR[mode] }}>Gratuit</p>
+            ) : listingMode === 'DON' ? (
+              <p className="text-[13px] font-[500]" style={{ color: MODE_COLOR[listingMode] }}>Gratuit</p>
             ) : (
               <p className="text-[12px]" style={{ color: 'var(--muted)' }}>Échange</p>
             )}
@@ -291,7 +291,7 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
           <div className="flex items-center gap-2.5 mb-4">
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-[500] shrink-0"
-              style={{ background: MODE_LIGHT[mode], color: MODE_COLOR[mode] }}
+              style={{ background: MODE_LIGHT[listingMode], color: MODE_COLOR[listingMode] }}
             >
               {otherParticipant?.name?.[0]?.toUpperCase() || 'U'}
             </div>
@@ -318,7 +318,7 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
           <Link
             href={`/annonces/${listing.id}`}
             className="block text-center text-[12px] font-[500] py-2.5 rounded-pill mt-4 transition-all"
-            style={{ background: MODE_LIGHT[mode], color: MODE_COLOR[mode], border: `0.5px solid ${MODE_COLOR[mode]}33` }}
+            style={{ background: MODE_LIGHT[listingMode], color: MODE_COLOR[listingMode], border: `0.5px solid ${MODE_COLOR[listingMode]}33` }}
           >
             Voir l'annonce →
           </Link>
