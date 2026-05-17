@@ -80,12 +80,12 @@ function SignInForm() {
           <form onSubmit={handleCredentialsSignIn} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-[500] text-charcoal/70">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.fr" className="input-base" required />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.fr" className="input-base" autoComplete="email" required />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-[500] text-charcoal/70">Mot de passe</label>
               <div className="relative">
-                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="input-base pr-10" required />
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="input-base pr-10" autoComplete="current-password" required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-charcoal/60">
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
