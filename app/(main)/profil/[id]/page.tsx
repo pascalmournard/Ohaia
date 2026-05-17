@@ -7,6 +7,7 @@ import { MapPin, Calendar } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import AnnonceCard from '@/components/annonces/AnnonceCard'
+import Avatar from '@/components/ui/Avatar'
 import type { Metadata } from 'next'
 import type { Listing } from '@/types'
 
@@ -102,23 +103,7 @@ export default async function ProfilPage({ params, searchParams }: PageProps) {
           <div className="flex items-end gap-6 mb-6">
             {/* Avatar */}
             <div className="relative shrink-0">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name || ''}
-                  width={88}
-                  height={88}
-                  className="rounded-full object-cover"
-                  style={{ border: '3px solid var(--chalk)' }}
-                />
-              ) : (
-                <div
-                  className="w-[88px] h-[88px] rounded-full flex items-center justify-center font-serif text-[30px] font-[400] text-white"
-                  style={{ background: '#2D4A3E', border: '3px solid var(--chalk)' }}
-                >
-                  {user.name?.[0]?.toUpperCase() || 'U'}
-                </div>
-              )}
+              <Avatar src={user.image} name={user.name} size={88} />
               <span
                 className="absolute bottom-0.5 right-0.5 w-[22px] h-[22px] rounded-full flex items-center justify-center text-[12px]"
                 style={{ background: 'var(--chalk)', border: '2px solid var(--chalk)' }}

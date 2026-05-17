@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import Avatar from '@/components/ui/Avatar'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, Suspense } from 'react'
 import { Search, Menu, X } from 'lucide-react'
@@ -66,22 +67,15 @@ function HeaderContent() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 p-0.5 rounded-pill hover:bg-charcoal/5 transition-colors"
               >
-                {session.user.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name || 'Profil'}
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-[500]"
-                    style={{ background: 'var(--sand)', color: 'var(--charcoal)' }}
-                  >
-                    {session.user.name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                )}
+                <Avatar
+                  src={session.user.image}
+                  name={session.user.name}
+                  size={32}
+                  background="var(--sand)"
+                  border="none"
+                  fontSize={13}
+                  color="var(--charcoal)"
+                />
               </button>
 
               {userMenuOpen && (
