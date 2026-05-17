@@ -2,43 +2,18 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, Suspense } from 'react'
-import { Search, Menu, X, Plus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Search, Menu, X } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
-
-const MODES = [
-  { value: '', label: 'Tout' },
-  { value: 'VENTE', label: 'Vente', color: 'text-forest', activeColor: 'bg-forest text-white' },
-  { value: 'TROC', label: 'Troc', color: 'text-earth', activeColor: 'bg-earth text-white' },
-  { value: 'DON', label: 'Don', color: 'text-slate', activeColor: 'bg-slate text-white' },
-]
 
 function HeaderContent() {
   const { data: session } = useSession()
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchValue, setSearchValue] = useState(searchParams.get('search') || '')
-
-  const currentMode = searchParams.get('mode') || ''
-
-  function handleModeClick(mode: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (mode) {
-      params.set('mode', mode)
-    } else {
-      params.delete('mode')
-    }
-    if (pathname === '/') {
-      router.push(`/?${params.toString()}`)
-    } else {
-      router.push(`/annonces?${params.toString()}`)
-    }
-  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -52,204 +27,153 @@ function HeaderContent() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-chalk/90 backdrop-blur-sm border-b border-thin border-charcoal/10">
-      <div className="page-container">
-        <div className="flex items-center h-16 gap-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <span className="w-[7px] h-[7px] rounded-full bg-forest shrink-0 transition-colors duration-300" />
+    <header className="sticky top-0 z-50 bg-chalk/90 backdrop-blur-sm" style={{ borderBottom: '0.5px solid var(--border)' }}>
+      <div className="flex items-center h-16 px-6 gap-4">
+
+        {/* Left — Search (desktop) */}
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex items-center gap-2 rounded-pill px-4 py-2 transition-colors"
+          style={{
+            background: 'var(--sand)',
+            border: '0.5px solid var(--border)',
+            minWidth: 220,
+          }}
+        >
+          <Search size={13} style={{ color: 'var(--ml)', flexShrink: 0 }} />
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Rechercher..."
+            className="bg-transparent text-[13px] text-charcoal outline-none flex-1"
+            style={{ fontFamily: 'inherit' }}
+          />
+        </form>
+
+        {/* Center — Logo */}
+        <div className="flex-1 flex justify-center">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: 'var(--forest, #2D4A3E)' }} />
             <span className="font-serif text-[22px] tracking-[-0.3px] text-charcoal">Ohaia</span>
           </Link>
+        </div>
 
-          {/* Mode tabs — desktop */}
-          <nav className="hidden md:flex items-center gap-1 ml-2">
-            {MODES.map((mode) => (
+        {/* Right — Auth */}
+        <div className="hidden md:flex items-center gap-2">
+          {session?.user ? (
+            <div className="relative">
               <button
-                key={mode.value}
-                onClick={() => handleModeClick(mode.value)}
-                className={cn(
-                  'px-3 py-1.5 text-sm rounded-pill transition-all duration-150',
-                  currentMode === mode.value
-                    ? mode.value === ''
-                      ? 'bg-charcoal text-chalk'
-                      : mode.activeColor
-                    : cn('text-charcoal/60 hover:text-charcoal hover:bg-charcoal/5', mode.color)
-                )}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 p-0.5 rounded-pill hover:bg-charcoal/5 transition-colors"
               >
-                {mode.label}
-              </button>
-            ))}
-          </nav>
-
-          {/* Search bar */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-sm items-center bg-sand border border-thin border-charcoal/15 rounded-pill px-4 py-2 gap-2 focus-within:border-charcoal/30 transition-colors"
-          >
-            <Search size={14} className="text-charcoal/40 shrink-0" />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Rechercher..."
-              className="flex-1 bg-transparent text-sm text-charcoal placeholder:text-charcoal/40 outline-none"
-            />
-          </form>
-
-          <div className="flex-1" />
-
-          {/* Right side */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/publier" className="btn-primary text-sm gap-1.5">
-              <Plus size={14} />
-              Publier
-            </Link>
-
-            {session?.user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 p-0.5 rounded-pill hover:bg-charcoal/5 transition-colors"
-                >
-                  {session.user.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'Profil'}
-                      width={32}
-                      height={32}
-                      className="rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-charcoal/10 flex items-center justify-center text-sm font-[500] text-charcoal">
-                      {session.user.name?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                  )}
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-10 w-52 bg-chalk border border-thin border-charcoal/10 rounded-md shadow-card-hover py-1 animate-fade-in">
-                    <div className="px-4 py-2.5 border-b border-thin border-charcoal/8">
-                      <p className="text-sm font-[500] text-charcoal">{session.user.name}</p>
-                      <p className="text-xs text-charcoal/50 truncate">{session.user.email}</p>
-                    </div>
-                    <Link
-                      href={`/profil/${session.user.id}`}
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-charcoal hover:bg-charcoal/5 transition-colors"
-                    >
-                      Mon profil
-                    </Link>
-                    <Link
-                      href="/messages"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-charcoal hover:bg-charcoal/5 transition-colors"
-                    >
-                      Messages
-                    </Link>
-                    <button
-                      onClick={() => { signOut(); setUserMenuOpen(false) }}
-                      className="block w-full text-left px-4 py-2 text-sm text-charcoal/60 hover:bg-charcoal/5 transition-colors"
-                    >
-                      Se déconnecter
-                    </button>
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || 'Profil'}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-[500]"
+                    style={{ background: 'var(--sand)', color: 'var(--charcoal)' }}
+                  >
+                    {session.user.name?.[0]?.toUpperCase() || 'U'}
                   </div>
                 )}
-              </div>
-            ) : (
-              <Link href="/signin" className="btn-secondary text-sm">
-                Connexion
-              </Link>
-            )}
-          </div>
+              </button>
 
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-2 text-charcoal"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+              {userMenuOpen && (
+                <div
+                  className="absolute right-0 top-10 w-52 py-1 animate-fade-in"
+                  style={{
+                    background: 'var(--chalk)',
+                    border: '0.5px solid var(--border)',
+                    borderRadius: 'var(--r)',
+                    boxShadow: '0 4px 12px rgba(28,28,26,0.1)',
+                  }}
+                >
+                  <div className="px-4 py-2.5" style={{ borderBottom: '0.5px solid var(--border)' }}>
+                    <p className="text-[13px] font-[500] text-charcoal">{session.user.name}</p>
+                    <p className="text-[11px] truncate" style={{ color: 'var(--muted)' }}>{session.user.email}</p>
+                  </div>
+                  {[
+                    { href: `/profil/${session.user.id}`, label: 'Mon profil' },
+                    { href: '/messages', label: 'Messages' },
+                    { href: '/publier', label: 'Publier une annonce' },
+                  ].map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-4 py-2 text-[13px] text-charcoal hover:bg-charcoal/5 transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button
+                    onClick={() => { signOut(); setUserMenuOpen(false) }}
+                    className="block w-full text-left px-4 py-2 text-[13px] hover:bg-charcoal/5 transition-colors"
+                    style={{ color: 'var(--muted)' }}
+                  >
+                    Se déconnecter
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/signin"
+              className="text-[13px] px-5 py-2 rounded-pill transition-colors"
+              style={{ color: 'var(--cs)', border: '0.5px solid var(--borderS)', background: 'none' }}
+            >
+              Connexion
+            </Link>
+          )}
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden p-2 text-charcoal"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Menu"
+        >
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-thin border-charcoal/10 bg-chalk animate-slide-up">
-          <div className="page-container py-4 space-y-4">
-            {/* Mobile search */}
-            <form onSubmit={handleSearch} className="flex items-center bg-sand border border-thin border-charcoal/15 rounded-pill px-4 py-2 gap-2">
-              <Search size={14} className="text-charcoal/40 shrink-0" />
+        <div className="md:hidden animate-slide-up" style={{ borderTop: '0.5px solid var(--border)', background: 'var(--chalk)' }}>
+          <div className="px-6 py-4 space-y-4">
+            <form onSubmit={handleSearch} className="flex items-center gap-2 rounded-pill px-4 py-2" style={{ background: 'var(--sand)', border: '0.5px solid var(--border)' }}>
+              <Search size={13} style={{ color: 'var(--ml)', flexShrink: 0 }} />
               <input
                 type="text"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Rechercher..."
-                className="flex-1 bg-transparent text-sm text-charcoal placeholder:text-charcoal/40 outline-none"
+                className="flex-1 bg-transparent text-[13px] text-charcoal outline-none"
+                style={{ fontFamily: 'inherit' }}
               />
             </form>
 
-            {/* Mobile mode tabs */}
-            <div className="flex flex-wrap gap-2">
-              {MODES.map((mode) => (
-                <button
-                  key={mode.value}
-                  onClick={() => { handleModeClick(mode.value); setMobileOpen(false) }}
-                  className={cn(
-                    'px-3 py-1.5 text-sm rounded-pill transition-all duration-150',
-                    currentMode === mode.value
-                      ? mode.value === ''
-                        ? 'bg-charcoal text-chalk'
-                        : mode.activeColor
-                      : 'text-charcoal/60 bg-charcoal/5'
-                  )}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile nav links */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-thin border-charcoal/10">
-              <Link
-                href="/publier"
-                onClick={() => setMobileOpen(false)}
-                className="btn-primary text-sm self-start gap-1.5"
-              >
-                <Plus size={14} />
+            <div className="flex flex-col gap-1 pt-2" style={{ borderTop: '0.5px solid var(--border)' }}>
+              <Link href="/publier" onClick={() => setMobileOpen(false)} className="text-[13px] font-[500] text-charcoal py-2">
                 Publier une annonce
               </Link>
               {session?.user ? (
                 <>
-                  <Link
-                    href={`/profil/${session.user.id}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm text-charcoal hover:text-charcoal/70 py-1"
-                  >
-                    Mon profil
-                  </Link>
-                  <Link
-                    href="/messages"
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm text-charcoal hover:text-charcoal/70 py-1"
-                  >
-                    Messages
-                  </Link>
-                  <button
-                    onClick={() => { signOut(); setMobileOpen(false) }}
-                    className="text-sm text-charcoal/50 text-left py-1"
-                  >
+                  <Link href={`/profil/${session.user.id}`} onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Mon profil</Link>
+                  <Link href="/messages" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Messages</Link>
+                  <button onClick={() => { signOut(); setMobileOpen(false) }} className="text-[13px] text-left py-2" style={{ color: 'var(--muted)' }}>
                     Se déconnecter
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/signin"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-sm text-charcoal hover:text-charcoal/70 py-1"
-                >
-                  Connexion
-                </Link>
+                <Link href="/signin" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Connexion</Link>
               )}
             </div>
           </div>
@@ -262,7 +186,7 @@ function HeaderContent() {
 export default function Header() {
   return (
     <Suspense fallback={
-      <header className="sticky top-0 z-50 bg-chalk/90 backdrop-blur-sm border-b border-thin border-charcoal/10 h-16" />
+      <header className="sticky top-0 z-50 bg-chalk/90 backdrop-blur-sm h-16" style={{ borderBottom: '0.5px solid var(--border)' }} />
     }>
       <HeaderContent />
     </Suspense>
