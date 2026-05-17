@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Send, ArrowLeft } from 'lucide-react'
+import { Send, ArrowLeft, Pencil, Check, X } from 'lucide-react'
 import { cn, timeAgo, MODE_CONFIG } from '@/lib/utils'
 import type { Message, ConversationWithMessages } from '@/types'
 
@@ -16,8 +16,12 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
   const [messages, setMessages] = useState<Message[]>(conversation.messages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editInput, setEditInput] = useState('')
+  const [saving, setSaving] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   const mode = MODE_CONFIG[conversation.listing.mode]
   const otherParticipant = conversation.participants.find((p) => p.id !== currentUserId)
@@ -48,6 +52,40 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
     const interval = setInterval(poll, 3000)
     return () => clearInterval(interval)
   }, [poll])
+
+  function startEdit(message: Message) {
+    setEditingId(message.id)
+    setEditInput(message.content)
+    setTimeout(() => {
+      editTextareaRef.current?.focus()
+      editTextareaRef.current?.select()
+    }, 0)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditInput('')
+  }
+
+  async function saveEdit(messageId: string) {
+    const content = editInput.trim()
+    if (!content || saving) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/conversations/${conversation.id}/messages/${messageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      })
+      if (res.ok) {
+        const updated: Message = await res.json()
+        setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)))
+        setEditingId(null)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
@@ -195,18 +233,70 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
                   'flex flex-col'
                 )}
               >
-                <div
-                  className={cn(
-                    'px-3.5 py-2.5 rounded-md text-sm leading-relaxed',
-                    isOwn
-                      ? 'bg-charcoal text-chalk rounded-br-sm'
-                      : 'bg-sand border border-thin border-charcoal/10 text-charcoal rounded-bl-sm'
-                  )}
-                >
-                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                </div>
+                {isOwn && editingId === message.id ? (
+                  /* ── Mode édition ── */
+                  <div className="w-full min-w-[200px]">
+                    <textarea
+                      ref={editTextareaRef}
+                      value={editInput}
+                      onChange={(e) => setEditInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') cancelEdit()
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          saveEdit(message.id)
+                        }
+                      }}
+                      rows={2}
+                      className="w-full bg-charcoal/5 border border-charcoal/20 rounded-md px-3 py-2 text-sm text-charcoal outline-none resize-none leading-relaxed focus:border-charcoal/40"
+                    />
+                    <div className="flex items-center justify-end gap-1.5 mt-1.5">
+                      <button
+                        onClick={cancelEdit}
+                        className="p-1.5 rounded-md text-charcoal/40 hover:text-charcoal hover:bg-charcoal/5 transition-colors"
+                        title="Annuler"
+                      >
+                        <X size={13} />
+                      </button>
+                      <button
+                        onClick={() => saveEdit(message.id)}
+                        disabled={!editInput.trim() || saving}
+                        className="p-1.5 rounded-md text-chalk bg-charcoal hover:bg-charcoal/80 disabled:opacity-40 transition-colors"
+                        title="Enregistrer"
+                      >
+                        <Check size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── Bulle normale ── */
+                  <div className={cn('group relative', isOwn ? 'flex flex-col items-end' : 'flex flex-col items-start')}>
+                    {isOwn && (
+                      <button
+                        onClick={() => startEdit(message)}
+                        className="absolute -left-7 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md text-charcoal/30 hover:text-charcoal/60 hover:bg-charcoal/5"
+                        title="Modifier"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                    )}
+                    <div
+                      className={cn(
+                        'px-3.5 py-2.5 rounded-md text-sm leading-relaxed',
+                        isOwn
+                          ? 'bg-charcoal text-chalk rounded-br-sm'
+                          : 'bg-sand border border-thin border-charcoal/10 text-charcoal rounded-bl-sm'
+                      )}
+                    >
+                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                    </div>
+                  </div>
+                )}
                 <p className="text-[11px] text-charcoal/30 px-1">
                   {timeAgo(new Date(message.createdAt))}
+                  {(message as Message & { editedAt?: Date | null }).editedAt && (
+                    <span className="ml-1 opacity-60">· modifié</span>
+                  )}
                 </p>
               </div>
             </div>

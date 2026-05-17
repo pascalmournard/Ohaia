@@ -144,9 +144,10 @@ model Conversation {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String   @db.Text
-  createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
 
   senderId       String
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
