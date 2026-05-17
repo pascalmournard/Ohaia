@@ -15,7 +15,7 @@ export default function AProposPage() {
       {/* Hero */}
       <section
         style={{
-          background: 'var(--charcoal)',
+          background: '#2A3D52',
           color: 'var(--chalk)',
           padding: '96px 24px',
           textAlign: 'center',
@@ -136,7 +136,7 @@ export default function AProposPage() {
       </section>
 
       {/* Engagements */}
-      <section style={{ background: 'var(--charcoal)', color: 'var(--chalk)', padding: '80px 24px' }}>
+      <section style={{ background: '#2A3D52', color: 'var(--chalk)', padding: '80px 24px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <p
             style={{
@@ -222,7 +222,7 @@ export default function AProposPage() {
                   width: 40,
                   height: 40,
                   borderRadius: '50%',
-                  background: 'var(--charcoal)',
+                  background: '#2A3D52',
                   color: 'var(--chalk)',
                   display: 'flex',
                   alignItems: 'center',
@@ -255,7 +255,7 @@ export default function AProposPage() {
             <Link
               href="/annonces"
               style={{
-                background: 'var(--charcoal)',
+                background: '#2A3D52',
                 color: 'var(--chalk)',
                 padding: '12px 28px',
                 borderRadius: 999,
