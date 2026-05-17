@@ -13,6 +13,9 @@
   --forest: #2D4A3E;
   --earth: #4A3520;
   --slate: #2A3D52;
+  --buy: #2D4A3E;
+  --bar: #4A3520;
+  --giv: #2A3D52;
   --buyl: #E8F0ED;
   --barl: #F0EBE3;
   --givl: #E5ECF4;
@@ -172,4 +175,14 @@
 }
 .conv-item-hover:hover {
   background: var(--sand) !important;
+}
+
+@keyframes obFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

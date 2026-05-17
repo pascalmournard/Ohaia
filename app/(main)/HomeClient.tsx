@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MapPin } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { cn, timeAgo } from '@/lib/utils'
 import type { Listing } from '@/types'
 
@@ -149,6 +150,7 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Tout')
   const router = useRouter()
+  const { data: session } = useSession()
   const cfg = MODE_CONFIG[mode]
 
   const filtered = listings.filter((l) => l.mode === mode)
@@ -375,15 +377,27 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
         <p className="text-[13px] font-[300] mb-8 mx-auto" style={{ color: 'var(--ml)', maxWidth: 400 }}>
           Pensée pour créer du lien, réduire le gaspillage, et valoriser ce qui compte vraiment.
         </p>
-        <Link
-          href="/publier"
-          className="inline-flex items-center gap-2 text-[14px] font-[500] px-8 py-3.5 rounded-pill transition-all"
-          style={{ background: 'var(--chalk)', color: 'var(--charcoal)' }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.87')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-        >
-          Publier une annonce
-        </Link>
+        {session?.user ? (
+          <Link
+            href="/publier"
+            className="inline-flex items-center gap-2 text-[14px] font-[500] px-8 py-3.5 rounded-pill transition-all"
+            style={{ background: 'var(--chalk)', color: 'var(--charcoal)' }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.87')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+          >
+            Publier une annonce
+          </Link>
+        ) : (
+          <Link
+            href="/rejoindre"
+            className="inline-flex items-center gap-2 text-[14px] font-[500] px-8 py-3.5 rounded-pill transition-all"
+            style={{ background: 'var(--chalk)', color: 'var(--charcoal)' }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.87')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+          >
+            Rejoindre Ohaia
+          </Link>
+        )}
         <div className="flex gap-8 justify-center flex-wrap mt-12">
           {[
             { num: '2 400+', label: 'Annonces actives' },

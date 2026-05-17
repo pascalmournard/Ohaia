@@ -118,13 +118,22 @@ function HeaderContent() {
               )}
             </div>
           ) : (
-            <Link
-              href="/signin"
-              className="text-[13px] px-5 py-2 rounded-pill transition-colors"
-              style={{ color: 'var(--cs)', border: '0.5px solid var(--borderS)', background: 'none' }}
-            >
-              Connexion
-            </Link>
+            <>
+              <Link
+                href="/signin"
+                className="text-[13px] px-5 py-2 rounded-pill transition-colors"
+                style={{ color: 'var(--cs)', border: '0.5px solid var(--borderS)', background: 'none' }}
+              >
+                Connexion
+              </Link>
+              <Link
+                href="/rejoindre"
+                className="text-[13px] px-5 py-2 rounded-pill transition-colors"
+                style={{ background: 'var(--charcoal)', color: 'var(--chalk)', border: 'none' }}
+              >
+                Rejoindre
+              </Link>
+            </>
           )}
         </div>
 
@@ -168,6 +177,7 @@ function HeaderContent() {
                 </>
               ) : (
                 <Link href="/signin" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Connexion</Link>
+                  <Link href="/rejoindre" onClick={() => setMobileOpen(false)} className="text-[13px] font-[500] text-charcoal py-2">Rejoindre</Link>
               )}
             </div>
           </div>
