@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { Loader2, Check, Eye, EyeOff } from 'lucide-react'
@@ -8,10 +8,35 @@ import CitySearch, { CityResult } from '@/components/ui/CitySearch'
 
 type Mode = 'buy' | 'bar' | 'giv'
 
-const MODES: { id: Mode; emoji: string; name: string; hint: string; color: string; border: string; bg: string }[] = [
-  { id: 'buy', emoji: '🛍️', name: 'Acheter · Vendre', hint: 'Je veux acheter ou vendre des objets', color: 'var(--buy)', border: 'var(--buy)', bg: 'var(--buyl)' },
-  { id: 'bar', emoji: '⇄', name: 'Troquer', hint: "J'échange sans argent", color: 'var(--bar)', border: 'var(--bar)', bg: 'var(--barl)' },
-  { id: 'giv', emoji: '🎁', name: 'Donner', hint: 'Je donne ou cherche des dons', color: 'var(--giv)', border: 'var(--giv)', bg: 'var(--givl)' },
+const IconBuy = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 7h14l-1.8 10H8.8L7 7z" />
+    <path d="M10 7c0-2.2 1.8-4 4-4s4 1.8 4 4" />
+    <circle cx="11" cy="21" r="1.2" fill="currentColor" stroke="none" />
+    <circle cx="17" cy="21" r="1.2" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const IconBar = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 9h13M5 9l4-4M5 9l4 4" />
+    <path d="M23 19H10M23 19l-4-4M23 19l-4 4" />
+  </svg>
+)
+
+const IconGiv = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 6c0-2 1.5-3 3-3s3 1.5 2 3H14zM14 6c0-2-1.5-3-3-3S8 4.5 9 6h5z" />
+    <rect x="5" y="6" width="18" height="4" rx="2" />
+    <path d="M6 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10" />
+    <line x1="14" y1="10" x2="14" y2="22" />
+  </svg>
+)
+
+const MODES: { id: Mode; icon: ReactNode; name: string; hint: string; color: string; border: string; bg: string }[] = [
+  { id: 'buy', icon: <IconBuy />, name: 'Acheter · Vendre', hint: 'Je veux acheter ou vendre des objets', color: 'var(--buy)', border: 'var(--buy)', bg: 'var(--buyl)' },
+  { id: 'bar', icon: <IconBar />, name: 'Troquer', hint: "J'échange sans argent", color: 'var(--bar)', border: 'var(--bar)', bg: 'var(--barl)' },
+  { id: 'giv', icon: <IconGiv />, name: 'Donner', hint: 'Je donne ou cherche des dons', color: 'var(--giv)', border: 'var(--giv)', bg: 'var(--givl)' },
 ]
 
 const CATEGORIES = ['Meubles', 'Électronique', 'Mode', 'Vélos', 'Livres', 'Art & déco', 'Sport', 'Jardinage', 'Cuisine', 'Instruments', 'Jouets', 'Autre']
@@ -247,7 +272,7 @@ export default function OnboardingPage() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      <div style={{ fontSize: 22, marginBottom: 8 }}>{m.emoji}</div>
+                      <div style={{ marginBottom: 10, color: selected ? m.color : 'var(--ml)' }}>{m.icon}</div>
                       <div style={{ fontSize: 12, fontWeight: 500, color: selected ? m.color : 'var(--charcoal)', marginBottom: 3 }}>
                         {m.name}
                       </div>

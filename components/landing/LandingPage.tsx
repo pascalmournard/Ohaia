@@ -92,7 +92,7 @@ export default function LandingPage() {
           }}
         >
           Ohaia réunit achat, troc et don dans un même espace. Simple, beau, humain.
-          Pour ce qui vous appartient — et ce qui peut appartenir à quelqu&rsquo;un d&rsquo;autre.
+          Pour ce qui vous appartient, et ce qui peut appartenir à quelqu&rsquo;un d&rsquo;autre.
         </p>
 
         {/* CTAs */}
@@ -122,7 +122,7 @@ export default function LandingPage() {
               ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
             }}
           >
-            Commencer gratuitement
+            Commencer
           </Link>
           <Link
             href="/annonces"
@@ -273,7 +273,7 @@ export default function LandingPage() {
           <em style={{ fontStyle: 'italic', color: 'var(--ml)' }}>Aidons-les à continuer.</em>
         </h2>
         <p style={{ fontSize: 13, color: 'var(--ml)', fontWeight: 300, maxWidth: 400, margin: '0 auto 32px' }}>
-          Chaque vente évitée, chaque troc réalisé, chaque don accepté est un acte concret pour la planète — et pour le lien humain.
+          Chaque vente évitée, chaque troc réalisé, chaque don accepté est un acte concret pour la planète, et pour le lien humain.
         </p>
         <Link
           href="/rejoindre"
