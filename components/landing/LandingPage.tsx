@@ -273,7 +273,7 @@ export default function LandingPage() {
           <em style={{ fontStyle: 'italic', color: 'var(--ml)' }}>Aidons-les à continuer.</em>
         </h2>
         <p style={{ fontSize: 13, color: 'var(--ml)', fontWeight: 300, maxWidth: 400, margin: '0 auto 32px' }}>
-          Chaque vente évitée, chaque troc réalisé, chaque don accepté est un acte concret pour la planète, et pour le lien humain.
+          Chaque achat de produit neuf évité, chaque troc réalisé, chaque don accepté est un acte concret pour la planète, et pour le lien humain.
         </p>
         <Link
           href="/rejoindre"
