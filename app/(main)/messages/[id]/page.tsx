@@ -53,11 +53,9 @@ export default async function ConversationPage({ params }: PageProps) {
   if (!conversation) notFound()
 
   return (
-    <div className="page-container py-0">
-      <MessageThread
-        conversation={conversation}
-        currentUserId={session.user.id}
-      />
-    </div>
+    <MessageThread
+      conversation={conversation}
+      currentUserId={session.user.id}
+    />
   )
 }

@@ -89,7 +89,7 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
   const MODE_LABEL: Record<string, string> = { VENTE: 'Vente',   TROC: 'Troc',    DON: 'Don'    }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex flex-1 min-w-0">
     {/* ─── CHAT COLUMN ─── */}
     <div className="flex flex-col flex-1 min-w-0">
       {/* Header */}
