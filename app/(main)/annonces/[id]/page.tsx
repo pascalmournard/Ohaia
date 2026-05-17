@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth'
 import { timeAgo, formatPrice, getCategoryLabel, getConditionLabel } from '@/lib/utils'
 import AnnonceCard from '@/components/annonces/AnnonceCard'
 import ContactButton from '@/components/annonces/ContactButton'
+import TrocMatches from '@/components/annonces/TrocMatches'
 import dynamicImport from 'next/dynamic'
 const ListingMap = dynamicImport(() => import('@/components/ui/ListingMap'), { ssr: false })
 import type { Metadata } from 'next'
@@ -430,6 +431,9 @@ export default async function AnnoncePage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Troc matches */}
+      {listing.mode === 'TROC' && <TrocMatches listingId={listing.id} />}
 
       {/* Similar listings */}
       {similarListings.length > 0 && (
