@@ -12,6 +12,8 @@ const updateListingSchema = z.object({
   tradeFor: z.string().max(200).optional().nullable(),
   images: z.array(z.string()).max(8).optional(),
   city: z.string().min(1).max(100).optional(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
   status: z.enum(['ACTIVE', 'SOLD', 'RESERVED', 'CLOSED']).optional(),
 })
 

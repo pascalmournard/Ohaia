@@ -9,6 +9,7 @@ import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { X, Check, Trash2 } from 'lucide-react'
 import { CATEGORIES, CONDITIONS } from '@/lib/utils'
+import CitySearch from '@/components/ui/CitySearch'
 import type { Listing as PrismaListing } from '@prisma/client'
 
 const schema = z.object({
@@ -66,6 +67,10 @@ export default function EditForm({ listing }: Props) {
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [coords, setCoords] = useState<{ lat?: number; lng?: number }>({
+    lat: listing.latitude ?? undefined,
+    lng: listing.longitude ?? undefined,
+  })
 
   const {
     register,
@@ -125,6 +130,8 @@ export default function EditForm({ listing }: Props) {
       if (listing.mode === 'TROC') {
         payload.tradeFor = data.tradeFor || null
       }
+      if (coords.lat) payload.latitude = coords.lat
+      if (coords.lng) payload.longitude = coords.lng
 
       const res = await fetch(`/api/annonces/${listing.id}`, {
         method: 'PUT',
@@ -452,12 +459,13 @@ export default function EditForm({ listing }: Props) {
           <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
             Localisation
           </p>
-          <input
-            {...register('city')}
-            placeholder="Ex : Paris, Lyon, Marseille..."
-            style={{ ...inputStyle, padding: '12px 16px', fontSize: 14 }}
-            onFocus={(e) => (e.target.style.borderColor = 'var(--charcoal)')}
-            onBlur={(e) => (e.target.style.borderColor = 'var(--borderS)')}
+          <CitySearch
+            defaultValue={listing.city}
+            onSelect={(result) => {
+              setValue('city', result.city)
+              setCoords({ lat: result.lat, lng: result.lng })
+            }}
+            inputStyle={{ ...inputStyle, padding: '12px 16px', fontSize: 14 }}
           />
           {errors.city && <p className="text-[11px] text-red-500 mt-2">{errors.city.message}</p>}
         </div>

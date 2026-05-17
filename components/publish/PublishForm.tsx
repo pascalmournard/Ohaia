@@ -9,6 +9,7 @@ import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { X, Check } from 'lucide-react'
 import { CATEGORIES, CONDITIONS } from '@/lib/utils'
+import CitySearch from '@/components/ui/CitySearch'
 
 const schema = z.object({
   mode: z.enum(['VENTE', 'TROC', 'DON']),
@@ -95,6 +96,7 @@ export default function PublishForm() {
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [negotiable, setNegotiable] = useState(false)
+  const [coords, setCoords] = useState<{ lat?: number; lng?: number }>({})
 
   const {
     register,
@@ -191,6 +193,8 @@ export default function PublishForm() {
         tradeFor: data.mode === 'TROC' ? data.tradeFor : undefined,
         images: imageUrls,
         city: data.city,
+        latitude: coords.lat,
+        longitude: coords.lng,
       }
       const res = await fetch('/api/annonces', {
         method: 'POST',
@@ -577,10 +581,13 @@ export default function PublishForm() {
               <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)', marginBottom: 18 }}>
                 Localisation
               </p>
-              <input
-                {...register('city')}
-                placeholder="Ex : Paris, Lyon, Marseille..."
-                style={{
+              <CitySearch
+                defaultValue={watch('city')}
+                onSelect={(result) => {
+                  setValue('city', result.city)
+                  setCoords({ lat: result.lat, lng: result.lng })
+                }}
+                inputStyle={{
                   width: '100%',
                   background: 'var(--chalk)',
                   border: '0.5px solid var(--borderS)',
@@ -591,8 +598,6 @@ export default function PublishForm() {
                   color: 'var(--charcoal)',
                   outline: 'none',
                 }}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--charcoal)')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--borderS)')}
               />
               {errors.city && <p className="text-[11px] text-red-500 mt-2">{errors.city.message}</p>}
             </div>

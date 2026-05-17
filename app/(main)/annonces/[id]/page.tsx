@@ -9,6 +9,8 @@ import { auth } from '@/lib/auth'
 import { timeAgo, formatPrice, getCategoryLabel, getConditionLabel } from '@/lib/utils'
 import AnnonceCard from '@/components/annonces/AnnonceCard'
 import ContactButton from '@/components/annonces/ContactButton'
+import dynamic from 'next/dynamic'
+const ListingMap = dynamic(() => import('@/components/ui/ListingMap'), { ssr: false })
 import type { Metadata } from 'next'
 import type { Listing } from '@/types'
 
@@ -282,23 +284,32 @@ export default async function AnnoncePage({ params }: PageProps) {
               <p className="text-[13px] mb-2.5" style={{ color: 'var(--muted)' }}>
                 {listing.city} · remise en main propre
               </p>
-              <div
-                className="w-full flex items-center justify-center relative overflow-hidden"
-                style={{
-                  height: 120,
-                  background: 'var(--sand)',
-                  borderRadius: 'var(--rs)',
-                  border: '0.5px solid var(--border)',
-                }}
-              >
-                <MapPin size={22} style={{ color: 'var(--ml)', opacity: 0.5 }} />
-                <span
-                  className="absolute bottom-2.5 left-3 text-[11px] px-2 py-0.5 rounded-pill"
-                  style={{ color: 'var(--muted)', background: 'rgba(250,250,247,0.9)' }}
+              {listing.latitude && listing.longitude ? (
+                <ListingMap
+                  lat={listing.latitude}
+                  lng={listing.longitude}
+                  city={listing.city}
+                  mode={listing.mode}
+                />
+              ) : (
+                <div
+                  className="w-full flex items-center justify-center relative overflow-hidden"
+                  style={{
+                    height: 120,
+                    background: 'var(--sand)',
+                    borderRadius: 'var(--rs)',
+                    border: '0.5px solid var(--border)',
+                  }}
                 >
-                  {listing.city}
-                </span>
-              </div>
+                  <MapPin size={22} style={{ color: 'var(--ml)', opacity: 0.5 }} />
+                  <span
+                    className="absolute bottom-2.5 left-3 text-[11px] px-2 py-0.5 rounded-pill"
+                    style={{ color: 'var(--muted)', background: 'rgba(250,250,247,0.9)' }}
+                  >
+                    {listing.city}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
