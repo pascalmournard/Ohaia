@@ -31,33 +31,34 @@ function HeaderContent() {
     <header className="sticky top-0 z-50 bg-chalk/90 backdrop-blur-sm" style={{ borderBottom: '0.5px solid var(--border)' }}>
       <div className="flex items-center h-16 px-6 gap-4">
 
-        {/* Left — Search (desktop) */}
+        {/* Left — Logo */}
+        <Link href="/" className="hover:opacity-80 transition-opacity shrink-0">
+          <span className="font-serif text-[32px] tracking-[-0.5px] text-charcoal">Ohaia</span>
+        </Link>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Right — Search (desktop) */}
         <form
           onSubmit={handleSearch}
-          className="hidden md:flex items-center gap-2 rounded-pill px-4 py-2 transition-colors"
+          className="hidden md:flex items-center gap-2 rounded-pill px-3 py-1.5 transition-colors"
           style={{
             background: 'var(--sand)',
             border: '0.5px solid var(--border)',
-            minWidth: 220,
+            width: 160,
           }}
         >
-          <Search size={13} style={{ color: 'var(--ml)', flexShrink: 0 }} />
+          <Search size={12} style={{ color: 'var(--ml)', flexShrink: 0 }} />
           <input
             type="text"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Rechercher..."
-            className="bg-transparent text-[13px] text-charcoal outline-none flex-1"
+            className="bg-transparent text-[12px] text-charcoal outline-none flex-1"
             style={{ fontFamily: 'inherit' }}
           />
         </form>
-
-        {/* Center — Logo */}
-        <div className="flex-1 flex justify-center">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <span className="font-serif text-[28px] tracking-[-0.5px] text-charcoal">Ohaia</span>
-          </Link>
-        </div>
 
         {/* Right — Auth */}
         <div className="hidden md:flex items-center gap-2">
