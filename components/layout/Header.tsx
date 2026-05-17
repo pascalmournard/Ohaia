@@ -176,8 +176,10 @@ function HeaderContent() {
                   </button>
                 </>
               ) : (
-                <Link href="/signin" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Connexion</Link>
+                <>
+                  <Link href="/signin" onClick={() => setMobileOpen(false)} className="text-[13px] text-charcoal py-2">Connexion</Link>
                   <Link href="/rejoindre" onClick={() => setMobileOpen(false)} className="text-[13px] font-[500] text-charcoal py-2">Rejoindre</Link>
+                </>
               )}
             </div>
           </div>
