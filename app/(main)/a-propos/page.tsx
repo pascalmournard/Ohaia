@@ -109,7 +109,7 @@ export default function AProposPage() {
             Des cartons, des livres, et l&apos;envie que ça serve à quelqu&apos;un.
           </h2>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)' }}>
-            Camille et Lucas déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu&apos;ils ne veulent pas jeter mais qu&apos;ils n&apos;ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
+            Céline et Pascal déménagent en 2023. Ils ont des livres, des disques, des affaires de cuisine qu&apos;ils ne veulent pas jeter mais qu&apos;ils n&apos;ont pas le temps de vendre. Ils essaient les grandes plateformes. Les interfaces sont épuisantes, les frais opaques, les acheteurs fantômes. Ils finissent par poser des cartons devant leur porte avec un mot manuscrit.
           </p>
           <p style={{ fontSize: 13, lineHeight: 1.9, color: 'var(--muted)', marginTop: 16 }}>
             Ohaia est née de cette frustration, et de l&apos;idée qu&apos;il devrait exister un endroit simple, local, sans friction, où faire circuler les objets entre voisins et personnes proches.
@@ -246,7 +246,7 @@ export default function AProposPage() {
       <section style={{ background: 'var(--sand)', padding: '80px 24px', textAlign: 'center' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <h2 className="font-serif" style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 400, lineHeight: 1.3, marginBottom: 20 }}>
-            Chaque échange sur Ohaia, c&apos;est un objet intéressant ou utile qu&apos;on n&apos;a pas fabriqué.
+            Chaque échange sur Ohaia, c&apos;est une chose intéressante ou utile qu&apos;on n&apos;a pas fabriquée.
           </h2>
           <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.8, marginBottom: 40 }}>
             On ne prétend pas changer le monde. On essaie juste de rendre un peu plus facile le fait de ne pas l&apos;abîmer.
