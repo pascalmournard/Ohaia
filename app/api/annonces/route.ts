@@ -11,8 +11,7 @@ const createListingSchema = z.object({
   description: z.string().min(10).max(2000),
   mode: z.enum(['VENTE', 'TROC', 'DON']),
   category: z.enum([
-    'ELECTRONIQUE', 'VETEMENTS', 'MOBILIER', 'LIVRES', 'SPORT',
-    'JARDINAGE', 'JOUETS', 'VEHICULES', 'IMMOBILIER', 'SERVICES', 'AUTRE',
+    'HABITAT', 'CULTURE', 'ELECTRONIQUE', 'MODE', 'SPORT_LOISIRS', 'VEHICULES', 'DIVERS',
   ]),
   condition: z.enum(['NEUF', 'TRES_BON', 'BON', 'ACCEPTABLE', 'POUR_PIECES']),
   price: z.number().min(0).optional(),

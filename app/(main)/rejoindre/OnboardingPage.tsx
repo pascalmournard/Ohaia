@@ -39,7 +39,7 @@ const MODES: { id: Mode; icon: ReactNode; name: string; hint: string; color: str
   { id: 'giv', icon: <IconGiv />, name: 'Donner', hint: 'Je donne ou cherche des dons', color: 'var(--giv)', border: 'var(--giv)', bg: 'var(--givl)' },
 ]
 
-const CATEGORIES = ['Meubles', 'Électronique', 'Mode', 'Vélos', 'Livres', 'Art & déco', 'Sport', 'Jardinage', 'Cuisine', 'Instruments', 'Jouets', 'Autre']
+const CATEGORIES = ['Habitat', 'Culture', 'Électronique', 'Mode', 'Sport & Loisirs', 'Véhicules', 'Divers']
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (

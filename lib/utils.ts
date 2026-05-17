@@ -48,16 +48,41 @@ export const MODE_CONFIG = {
 } as const
 
 export const CATEGORIES = [
-  { value: 'ELECTRONIQUE', label: 'Électronique' },
-  { value: 'VETEMENTS', label: 'Vêtements' },
-  { value: 'MOBILIER', label: 'Mobilier' },
-  { value: 'LIVRES', label: 'Livres' },
-  { value: 'SPORT', label: 'Sport' },
-  { value: 'JARDINAGE', label: 'Jardinage' },
-  { value: 'JOUETS', label: 'Jouets' },
-  { value: 'VEHICULES', label: 'Véhicules' },
-  { value: 'SERVICES', label: 'Services' },
-  { value: 'AUTRE', label: 'Autre' },
+  {
+    value: 'HABITAT',
+    label: 'Habitat',
+    hint: 'Meubles, déco, électroménager, vaisselle, literie, jardinage, bricolage, outillage',
+  },
+  {
+    value: 'CULTURE',
+    label: 'Culture',
+    hint: 'Livres, BD, musique, films, jeux de société, jouets, instruments, art',
+  },
+  {
+    value: 'ELECTRONIQUE',
+    label: 'Électronique',
+    hint: 'Téléphones, ordinateurs, TV, consoles, photo, son, gaming, accessoires',
+  },
+  {
+    value: 'MODE',
+    label: 'Mode',
+    hint: 'Vêtements, chaussures, sacs, accessoires, bijoux, montres',
+  },
+  {
+    value: 'SPORT_LOISIRS',
+    label: 'Sport & Loisirs',
+    hint: 'Sport, vélos, camping, randonnée, loisirs créatifs, jeux outdoor',
+  },
+  {
+    value: 'VEHICULES',
+    label: 'Véhicules',
+    hint: 'Voitures, motos, scooters, trottinettes, pièces et accessoires',
+  },
+  {
+    value: 'DIVERS',
+    label: 'Divers',
+    hint: 'Services, compétences, alimentation, animaux, tout le reste',
+  },
 ] as const
 
 export const CONDITIONS = [

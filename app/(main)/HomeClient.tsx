@@ -21,7 +21,16 @@ const MODE_CONFIG = {
     count: 'annonces',
     placeholder: 'Que recherchez-vous ?',
     filters: ['Prix', 'Catégorie', 'Distance', 'État'],
-    categories: ['Tout', 'Meubles', 'Électronique', 'Mode', 'Livres', 'Sport', 'Jardinage', 'Jouets'],
+    categories: [
+      { label: 'Tout',           value: '' },
+      { label: 'Habitat',        value: 'HABITAT' },
+      { label: 'Électronique',   value: 'ELECTRONIQUE' },
+      { label: 'Mode',           value: 'MODE' },
+      { label: 'Culture',        value: 'CULTURE' },
+      { label: 'Sport & Loisirs',value: 'SPORT_LOISIRS' },
+      { label: 'Véhicules',      value: 'VEHICULES' },
+      { label: 'Divers',         value: 'DIVERS' },
+    ],
     sectionTitle: 'Annonces récentes',
     promoTitle: 'Vendez facilement',
     promoText: 'Publiez une annonce en moins de 2 minutes',
@@ -37,7 +46,16 @@ const MODE_CONFIG = {
     count: 'propositions',
     placeholder: 'Ce que vous proposez…',
     filters: ['Catégorie', 'Valeur estimée', 'Distance'],
-    categories: ['Tout', 'Objets', 'Services', 'Compétences', 'Expériences', 'Abonnements'],
+    categories: [
+      { label: 'Tout',           value: '' },
+      { label: 'Habitat',        value: 'HABITAT' },
+      { label: 'Électronique',   value: 'ELECTRONIQUE' },
+      { label: 'Mode',           value: 'MODE' },
+      { label: 'Culture',        value: 'CULTURE' },
+      { label: 'Sport & Loisirs',value: 'SPORT_LOISIRS' },
+      { label: 'Véhicules',      value: 'VEHICULES' },
+      { label: 'Divers',         value: 'DIVERS' },
+    ],
     sectionTitle: "Propositions d'échange",
     promoTitle: "L'économie du partage",
     promoText: 'Échangez sans argent, créez du lien',
@@ -53,7 +71,16 @@ const MODE_CONFIG = {
     count: 'objets',
     placeholder: 'Quel objet cherchez-vous ?',
     filters: ['Catégorie', 'Distance', 'Urgence'],
-    categories: ['Tout', 'Meubles', 'Vêtements', 'Jouets', 'Livres', 'Cuisine', 'Électronique', 'Divers'],
+    categories: [
+      { label: 'Tout',           value: '' },
+      { label: 'Habitat',        value: 'HABITAT' },
+      { label: 'Électronique',   value: 'ELECTRONIQUE' },
+      { label: 'Mode',           value: 'MODE' },
+      { label: 'Culture',        value: 'CULTURE' },
+      { label: 'Sport & Loisirs',value: 'SPORT_LOISIRS' },
+      { label: 'Véhicules',      value: 'VEHICULES' },
+      { label: 'Divers',         value: 'DIVERS' },
+    ],
     sectionTitle: 'À adopter près de vous',
     promoTitle: "Donner, c'est agir",
     promoText: '100% gratuit · Impact direct · Zéro gaspillage',
@@ -149,7 +176,6 @@ function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
 export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [mode, setMode] = useState<Mode>('VENTE')
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState('Tout')
   const router = useRouter()
   const { data: session, status } = useSession()
   const cfg = MODE_CONFIG[mode]
@@ -168,7 +194,6 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
 
   function handleModeSwitch(m: Mode) {
     setMode(m)
-    setActiveCategory('Tout')
   }
 
   return (
@@ -270,18 +295,14 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
       {/* ─── CATEGORIES ─── */}
       <div className="flex gap-2 overflow-x-auto px-8 pb-6" style={{ scrollbarWidth: 'none' }}>
         {cfg.categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
+          <Link
+            key={cat.value}
+            href={cat.value ? `/annonces?mode=${mode}&category=${cat.value}` : `/annonces?mode=${mode}`}
             className="text-[11px] rounded-pill px-4 py-1.5 whitespace-nowrap shrink-0 transition-all"
-            style={
-              activeCategory === cat
-                ? { color: 'var(--charcoal)', background: 'var(--sand)', border: '0.5px solid transparent' }
-                : { color: 'var(--muted)', border: '0.5px solid var(--borderS)', background: 'none' }
-            }
+            style={{ color: 'var(--muted)', border: '0.5px solid var(--borderS)', background: 'none' }}
           >
-            {cat}
-          </button>
+            {cat.label}
+          </Link>
         ))}
       </div>
 
