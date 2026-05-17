@@ -4,11 +4,37 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { pusherServer } from '@/lib/pusher'
 
 const sendMessageSchema = z.object({
   content: z.string().min(1).max(2000),
 })
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 })
+
+  const since = request.nextUrl.searchParams.get('since')
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: params.id,
+        conversation: { participants: { some: { id: session.user.id } } },
+        ...(since ? { createdAt: { gt: new Date(since) } } : {}),
+      },
+      include: {
+        sender: { select: { id: true, name: true, image: true, city: true, createdAt: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+    return NextResponse.json(messages)
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -52,9 +78,6 @@ export async function POST(
       where: { id: params.id },
       data: { updatedAt: new Date() },
     })
-
-    // Trigger Pusher event for real-time delivery
-    await pusherServer.trigger(`conversation-${params.id}`, 'new-message', message)
 
     return NextResponse.json(message, { status: 201 })
   } catch (err) {

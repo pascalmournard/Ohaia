@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Send, ArrowLeft } from 'lucide-react'
-import { pusherClient } from '@/lib/pusher-client'
 import { cn, timeAgo, MODE_CONFIG } from '@/lib/utils'
 import type { Message, ConversationWithMessages } from '@/types'
 
@@ -27,20 +26,28 @@ export default function MessageThread({ conversation, currentUserId }: MessageTh
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  useEffect(() => {
-    const channel = pusherClient.subscribe(`conversation-${conversation.id}`)
+  const messagesRef = useRef<Message[]>(messages)
+  messagesRef.current = messages
 
-    channel.bind('new-message', (data: Message) => {
+  const poll = useCallback(async () => {
+    const last = messagesRef.current[messagesRef.current.length - 1]
+    const since = last ? last.createdAt : new Date(0).toISOString()
+    try {
+      const res = await fetch(`/api/conversations/${conversation.id}/messages?since=${encodeURIComponent(since)}`)
+      if (!res.ok) return
+      const fresh: Message[] = await res.json()
+      if (fresh.length === 0) return
       setMessages((prev) => {
-        if (prev.find((m) => m.id === data.id)) return prev
-        return [...prev, data]
+        const ids = new Set(prev.map((m) => m.id))
+        return [...prev, ...fresh.filter((m) => !ids.has(m.id))]
       })
-    })
-
-    return () => {
-      pusherClient.unsubscribe(`conversation-${conversation.id}`)
-    }
+    } catch {}
   }, [conversation.id])
+
+  useEffect(() => {
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
+  }, [poll])
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
