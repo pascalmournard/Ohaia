@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { SlidersHorizontal, MapPin, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MapPin, ChevronLeft, ChevronRight, Tag } from 'lucide-react'
 import { cn, MODE_CONFIG, CATEGORIES } from '@/lib/utils'
 import AnnonceCard from './AnnonceCard'
 import type { Listing, Mode } from '@/types'
@@ -133,7 +133,7 @@ export default function AnnonceFeed({
 
         {/* Category select */}
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={14} className="text-charcoal/40" />
+          <Tag size={13} style={{ color: '#E07A3A', flexShrink: 0 }} />
           <select
             value={currentCategory}
             onChange={(e) => updateParam('category', e.target.value)}
@@ -152,11 +152,12 @@ export default function AnnonceFeed({
 
         {/* City filter */}
         <form onSubmit={handleCitySearch} className="flex items-center gap-1.5">
-          <MapPin size={13} className="text-charcoal/40" />
+          <MapPin size={13} style={{ color: '#E07A3A', flexShrink: 0 }} />
           <input
             type="text"
             value={cityInput}
             onChange={(e) => setCityInput(e.target.value)}
+            onBlur={handleCitySearch}
             placeholder="Ville..."
             className="text-sm text-charcoal placeholder:text-charcoal/40 bg-transparent outline-none w-24 border-b border-thin border-charcoal/20 focus:border-charcoal/40 pb-0.5"
           />

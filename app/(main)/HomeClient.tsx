@@ -176,6 +176,7 @@ function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
 export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [mode, setMode] = useState<Mode>('VENTE')
   const [search, setSearch] = useState('')
+  const [city, setCity] = useState('')
   const router = useRouter()
   const { data: session, status } = useSession()
   const cfg = MODE_CONFIG[mode]
@@ -189,6 +190,7 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
     e.preventDefault()
     const params = new URLSearchParams({ mode })
     if (search.trim()) params.set('search', search.trim())
+    if (city.trim()) params.set('city', city.trim())
     router.push(`/annonces?${params.toString()}`)
   }
 
@@ -262,6 +264,17 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
             className="flex-1 bg-transparent text-[13px] text-charcoal outline-none py-2"
             style={{ '::placeholder': { color: 'var(--ml)' } } as React.CSSProperties}
           />
+          <div className="hidden sm:flex items-center gap-2 shrink-0 mx-2 pl-2" style={{ borderLeft: '0.5px solid var(--border)' }}>
+            <MapPin size={12} style={{ color: '#E07A3A', flexShrink: 0 }} />
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ville..."
+              className="bg-transparent text-[12px] text-charcoal outline-none w-20"
+              style={{ '::placeholder': { color: 'var(--ml)' } } as React.CSSProperties}
+            />
+          </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {cfg.filters.slice(0, 3).map((f) => (
               <button
