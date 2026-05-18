@@ -43,7 +43,7 @@ export default function AProposPage() {
             margin: '0 auto 28px',
           }}
         >
-          Les belles choses méritent d&apos;être transmises.
+          L&apos;appartenance peut être une transmission.
         </h1>
         <p style={{ fontSize: 15, opacity: 0.5, maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
           Ohaia est une plateforme d&apos;échanges locaux, vente, troc, don, pensée pour que les objets circulent plutôt qu&apos;ils ne s&apos;accumulent.
