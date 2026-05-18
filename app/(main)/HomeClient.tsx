@@ -409,7 +409,7 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
       </div>
 
       {/* ─── MANIFESTO BAND ─── */}
-      <div className="text-center py-16 px-8" style={{ background: 'var(--charcoal)' }}>
+      <div className="text-center py-16 px-8" style={{ background: '#2A3D52' }}>
         <h2
           className="font-serif text-[36px] font-[400] leading-[1.15] mb-4 mx-auto"
           style={{ color: 'var(--chalk)', maxWidth: 580 }}
