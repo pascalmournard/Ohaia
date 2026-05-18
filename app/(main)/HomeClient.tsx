@@ -128,9 +128,24 @@ const MODE_PANEL_ICONS = {
   ),
 }
 
+const TINTS = [
+  'rgba(45, 74, 62, 0.38)',   // vert forêt
+  'rgba(74, 53, 32, 0.34)',   // brun terre
+  'rgba(42, 61, 82, 0.36)',   // bleu nuit
+  'rgba(150, 90, 40, 0.30)',  // ambre chaud
+  'rgba(65, 50, 85, 0.30)',   // violet doux
+  'rgba(38, 72, 68, 0.34)',   // vert céladon
+]
+
+function cardTint(id: string): string {
+  const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  return TINTS[hash % TINTS.length]
+}
+
 function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
   const cfg = MODE_CONFIG[mode]
   const image = listing.images?.[0]
+  const tint = cardTint(listing.id)
 
   return (
     <Link
@@ -154,7 +169,7 @@ function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
         )}
         <div
           className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0"
-          style={{ background: 'rgba(250,250,247,0.28)' }}
+          style={{ background: tint }}
         />
       </div>
       <div className="p-3.5">
