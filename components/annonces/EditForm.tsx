@@ -63,6 +63,7 @@ export default function EditForm({ listing }: Props) {
   const accentLight = modeStyle.light
 
   const [imageUrls, setImageUrls] = useState<string[]>(listing.images ?? [])
+  const [acceptTrade, setAcceptTrade] = useState(!!(listing.tradeFor && listing.mode === 'VENTE'))
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -126,6 +127,7 @@ export default function EditForm({ listing }: Props) {
       }
       if (listing.mode === 'VENTE') {
         payload.price = data.price ? parseFloat(data.price) : null
+        payload.tradeFor = acceptTrade ? (data.tradeFor || null) : null
       }
       if (listing.mode === 'TROC') {
         payload.tradeFor = data.tradeFor || null
@@ -361,6 +363,68 @@ export default function EditForm({ listing }: Props) {
                 style={{ flex: 1, border: 'none', background: 'none', padding: '10px 14px', fontFamily: 'inherit', fontSize: 15, color: 'var(--charcoal)', outline: 'none' }}
               />
             </div>
+          </div>
+        )}
+
+        {/* Échange optionnel pour VENTE */}
+        {listing.mode === 'VENTE' && (
+          <div style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)' }}>
+                  Ouvert à l&apos;échange
+                </p>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--muted)' }}>
+                  En plus du prix, acceptez-vous un troc partiel ou total ?
+                </p>
+              </div>
+              {/* Toggle */}
+              <button
+                type="button"
+                onClick={() => setAcceptTrade(!acceptTrade)}
+                style={{
+                  width: 44,
+                  height: 24,
+                  borderRadius: 999,
+                  background: acceptTrade ? accent : 'var(--borderS)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  flexShrink: 0,
+                  transition: 'background 0.2s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 3,
+                  left: acceptTrade ? 23 : 3,
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  background: 'white',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  transition: 'left 0.2s',
+                }} />
+              </button>
+            </div>
+
+            {acceptTrade && (
+              <div className="mt-4 pt-4" style={{ borderTop: '0.5px solid var(--border)' }}>
+                <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>
+                  Ce que j&apos;accepte en échange
+                </label>
+                <input
+                  {...register('tradeFor')}
+                  placeholder="Ex : vélo, appareil photo, livres…"
+                  style={{ ...inputStyle }}
+                  onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = accent)}
+                  onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = 'var(--borderS)')}
+                />
+                <p className="text-[11px] mt-1.5" style={{ color: 'var(--muted)' }}>
+                  Cette information sera visible sur votre annonce et activera le matching d&apos;échanges.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
