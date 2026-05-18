@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MapPin } from 'lucide-react'
@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import { cn, timeAgo } from '@/lib/utils'
 import type { Listing } from '@/types'
 import LandingPage from '@/components/landing/LandingPage'
+import VideoIntro from '@/components/landing/VideoIntro'
 
 type Mode = 'VENTE' | 'TROC' | 'DON'
 
@@ -181,12 +182,28 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [mode, setMode] = useState<Mode>('VENTE')
   const [search, setSearch] = useState('')
   const [city, setCity] = useState('')
+  const [showIntro, setShowIntro] = useState(false)
   const router = useRouter()
   const { data: session, status } = useSession()
   const cfg = MODE_CONFIG[mode]
 
+  useEffect(() => {
+    if (status !== 'loading' && !session?.user) {
+      const seen = sessionStorage.getItem('intro-seen')
+      if (!seen) setShowIntro(true)
+    }
+  }, [status, session])
+
   if (status === 'loading') return null
-  if (!session?.user) return <LandingPage />
+
+  if (!session?.user) {
+    return (
+      <>
+        {showIntro && <VideoIntro onDone={() => setShowIntro(false)} />}
+        <LandingPage />
+      </>
+    )
+  }
 
   const filtered = listings.filter((l) => l.mode === mode)
 
