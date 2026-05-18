@@ -145,12 +145,16 @@ function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
         ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
       }}
     >
-      <div className="h-[120px] flex items-center justify-center text-4xl" style={{ background: cfg.accentLight }}>
+      <div className="h-[120px] flex items-center justify-center text-4xl relative overflow-hidden" style={{ background: cfg.accentLight }}>
         {image ? (
           <img src={image} alt={listing.title} className="w-full h-full object-cover" />
         ) : (
           <span style={{ opacity: 0.25 }}>□</span>
         )}
+        <div
+          className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0"
+          style={{ background: 'rgba(250,250,247,0.28)' }}
+        />
       </div>
       <div className="p-3.5">
         <div className="flex items-center gap-1.5 mb-1.5">
