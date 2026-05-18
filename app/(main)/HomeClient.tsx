@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MapPin } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { cn, timeAgo } from '@/lib/utils'
+import { cn, timeAgo, CONDITIONS } from '@/lib/utils'
 import type { Listing } from '@/types'
 import LandingPage from '@/components/landing/LandingPage'
 import VideoIntro from '@/components/landing/VideoIntro'
@@ -209,6 +209,14 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState('')
   const [showIntro, setShowIntro] = useState(false)
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [priceMin, setPriceMin] = useState('')
+  const [priceMax, setPriceMax] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [radiusKm, setRadiusKm] = useState<number | null>(null)
+  const [selectedCondition, setSelectedCondition] = useState('')
+  const [recentOnly, setRecentOnly] = useState(false)
+  const filterBarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const { data: session, status } = useSession()
   const cfg = MODE_CONFIG[mode]
@@ -219,6 +227,16 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
       if (!seen) setShowIntro(true)
     }
   }, [status, session])
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (filterBarRef.current && !filterBarRef.current.contains(e.target as Node)) {
+        setOpenFilter(null)
+      }
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
 
   if (status === 'loading') return null
 
@@ -238,7 +256,19 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
     const params = new URLSearchParams({ mode })
     if (search.trim()) params.set('search', search.trim())
     if (city.trim()) params.set('city', city.trim())
+    if (selectedCategory) params.set('category', selectedCategory)
+    if (priceMin) params.set('priceMin', priceMin)
+    if (priceMax) params.set('priceMax', priceMax)
+    if (radiusKm && city.trim()) params.set('radius', String(radiusKm))
+    if (selectedCondition) params.set('condition', selectedCondition)
+    if (recentOnly) params.set('recent', '7')
     router.push(`/annonces?${params.toString()}`)
+  }
+
+  function clearFilters() {
+    setPriceMin(''); setPriceMax('')
+    setSelectedCategory(''); setRadiusKm(null)
+    setSelectedCondition(''); setRecentOnly(false)
   }
 
   function handleModeSwitch(m: Mode) {
@@ -289,67 +319,235 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
         </div>
       </div>
 
-      {/* ─── SEARCH BAR ─── */}
-      <div className="px-8 pt-5 pb-6">
+      {/* ─── SEARCH BAR + FILTERS ─── */}
+      <div className="px-8 pt-5 pb-2" ref={filterBarRef}>
         <form
           onSubmit={handleSearch}
-          className="flex items-center rounded-pill"
-          style={{
-            background: 'var(--chalk)',
-            border: '0.5px solid var(--borderS)',
-            padding: '6px 6px 6px 20px',
-          }}
+          className="flex items-center rounded-pill mb-3"
+          style={{ background: 'var(--chalk)', border: '0.5px solid var(--borderS)', padding: '6px 6px 6px 20px' }}
         >
           <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--ml)" strokeWidth="1.5" className="shrink-0 mr-3">
             <circle cx="9" cy="9" r="6" /><path d="m15 15 3 3" />
           </svg>
           <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder={cfg.placeholder}
             className="flex-1 bg-transparent text-[13px] text-charcoal outline-none py-2"
-            style={{ '::placeholder': { color: 'var(--ml)' } } as React.CSSProperties}
           />
           <div className="hidden sm:flex items-center gap-2 shrink-0 mx-2 pl-2" style={{ borderLeft: '0.5px solid var(--border)' }}>
             <MapPin size={12} style={{ color: '#E07A3A', flexShrink: 0 }} />
             <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
+              type="text" value={city} onChange={(e) => setCity(e.target.value)}
               placeholder="Ville..."
               className="bg-transparent text-[12px] text-charcoal outline-none w-20"
-              style={{ '::placeholder': { color: 'var(--ml)' } } as React.CSSProperties}
             />
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {cfg.filters.slice(0, 3).map((f) => (
-              <button
-                key={f}
-                type="button"
-                className="hidden sm:block text-[11px] rounded-pill px-3.5 py-1.5 transition-colors whitespace-nowrap"
-                style={{
-                  color: 'var(--cs)',
-                  background: 'var(--sand)',
-                  border: '0.5px solid var(--border)',
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--sand-dark)')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--sand)')}
-              >
-                {f} ▾
-              </button>
-            ))}
-            <button
-              type="submit"
-              className="text-[13px] font-[500] text-chalk rounded-pill px-5 py-2 transition-all shrink-0"
-              style={{ background: cfg.accent }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.85')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-            >
-              Chercher
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="text-[13px] font-[500] text-chalk rounded-pill px-5 py-2 transition-all shrink-0"
+            style={{ background: cfg.accent }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.85')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+          >
+            Chercher
+          </button>
         </form>
+
+        {/* ─── FILTER CHIPS ─── */}
+        <div className="flex flex-wrap gap-2 pb-4">
+
+          {/* Prix / Valeur estimée */}
+          {(mode === 'VENTE' || mode === 'TROC') && (() => {
+            const active = !!(priceMin || priceMax)
+            const chipStyle: React.CSSProperties = active
+              ? { color: cfg.accent, background: cfg.accentLight, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' }
+              : { color: 'var(--cs)', background: 'var(--sand)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }
+            return (
+              <div style={{ position: 'relative' }}>
+                <button type="button" onClick={() => setOpenFilter(openFilter === 'prix' ? null : 'prix')}
+                  className="flex items-center gap-1.5 text-[11px] rounded-pill px-3.5 py-1.5 whitespace-nowrap transition-all"
+                  style={chipStyle}
+                >
+                  {active ? `${priceMin ? priceMin + ' €' : '0 €'} — ${priceMax ? priceMax + ' €' : '∞'}` : (mode === 'TROC' ? 'Valeur estimée' : 'Prix')}
+                  <span style={{ fontSize: 9, opacity: 0.6 }}>▾</span>
+                </button>
+                {openFilter === 'prix' && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 300, background: 'var(--chalk)', border: '0.5px solid var(--borderS)', borderRadius: 'var(--r)', boxShadow: '0 8px 32px rgba(28,28,26,0.13)', padding: '16px 18px', minWidth: 240 }}>
+                    <p className="text-[10px] font-[500] uppercase tracking-[0.5px] mb-3" style={{ color: 'var(--muted)' }}>
+                      {mode === 'TROC' ? 'Valeur estimée' : 'Budget'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5 mb-3">
+                      {(mode === 'VENTE'
+                        ? [{ l: '< 20 €', min: '', max: '20' }, { l: '20 – 50 €', min: '20', max: '50' }, { l: '50 – 150 €', min: '50', max: '150' }, { l: '150 – 500 €', min: '150', max: '500' }, { l: '500 – 1000 €', min: '500', max: '1000' }, { l: '> 1000 €', min: '1000', max: '' }]
+                        : [{ l: '< 30 €', min: '', max: '30' }, { l: '30 – 100 €', min: '30', max: '100' }, { l: '100 – 300 €', min: '100', max: '300' }, { l: '> 300 €', min: '300', max: '' }]
+                      ).map(p => {
+                        const sel = priceMin === p.min && priceMax === p.max
+                        return (
+                          <button key={p.l} type="button" onClick={() => { setPriceMin(p.min); setPriceMax(p.max) }}
+                            className="text-[11px] py-1.5 rounded-[var(--rs)] transition-all"
+                            style={sel ? { background: cfg.accentLight, color: cfg.accent, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' } : { background: 'var(--sand)', color: 'var(--cs)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }}
+                          >{p.l}</button>
+                        )
+                      })}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="number" min="0" placeholder="Min €" value={priceMin} onChange={(e) => setPriceMin(e.target.value)}
+                        className="flex-1 text-[12px] outline-none text-center"
+                        style={{ background: 'var(--sand)', border: '0.5px solid var(--border)', borderRadius: 'var(--rs)', padding: '6px 8px', fontFamily: 'inherit' }}
+                      />
+                      <span style={{ color: 'var(--muted)', fontSize: 11 }}>—</span>
+                      <input type="number" min="0" placeholder="Max €" value={priceMax} onChange={(e) => setPriceMax(e.target.value)}
+                        className="flex-1 text-[12px] outline-none text-center"
+                        style={{ background: 'var(--sand)', border: '0.5px solid var(--border)', borderRadius: 'var(--rs)', padding: '6px 8px', fontFamily: 'inherit' }}
+                      />
+                    </div>
+                    {active && (
+                      <button type="button" onClick={() => { setPriceMin(''); setPriceMax('') }}
+                        className="mt-3 text-[11px] w-full text-center"
+                        style={{ color: 'var(--muted)', cursor: 'pointer', background: 'none', border: 'none', fontFamily: 'inherit' }}
+                      >Effacer</button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Catégorie */}
+          {(() => {
+            const active = !!selectedCategory
+            const chipStyle: React.CSSProperties = active
+              ? { color: cfg.accent, background: cfg.accentLight, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' }
+              : { color: 'var(--cs)', background: 'var(--sand)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }
+            return (
+              <div style={{ position: 'relative' }}>
+                <button type="button" onClick={() => setOpenFilter(openFilter === 'categorie' ? null : 'categorie')}
+                  className="flex items-center gap-1.5 text-[11px] rounded-pill px-3.5 py-1.5 whitespace-nowrap transition-all"
+                  style={chipStyle}
+                >
+                  {active ? cfg.categories.find(c => c.value === selectedCategory)?.label : 'Catégorie'}
+                  <span style={{ fontSize: 9, opacity: 0.6 }}>▾</span>
+                </button>
+                {openFilter === 'categorie' && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 300, background: 'var(--chalk)', border: '0.5px solid var(--borderS)', borderRadius: 'var(--r)', boxShadow: '0 8px 32px rgba(28,28,26,0.13)', padding: '16px 18px', minWidth: 240 }}>
+                    <p className="text-[10px] font-[500] uppercase tracking-[0.5px] mb-3" style={{ color: 'var(--muted)' }}>Catégorie</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cfg.categories.map(cat => {
+                        const sel = selectedCategory === cat.value
+                        return (
+                          <button key={cat.value} type="button"
+                            onClick={() => { setSelectedCategory(cat.value === selectedCategory ? '' : cat.value); setOpenFilter(null) }}
+                            className="text-[11px] px-3 py-1.5 rounded-pill transition-all"
+                            style={sel ? { background: cfg.accentLight, color: cfg.accent, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' } : { background: 'var(--sand)', color: 'var(--cs)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }}
+                          >{cat.label}</button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Distance */}
+          {(() => {
+            const active = !!radiusKm
+            const chipStyle: React.CSSProperties = active
+              ? { color: cfg.accent, background: cfg.accentLight, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' }
+              : { color: 'var(--cs)', background: 'var(--sand)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }
+            return (
+              <div style={{ position: 'relative' }}>
+                <button type="button" onClick={() => setOpenFilter(openFilter === 'distance' ? null : 'distance')}
+                  className="flex items-center gap-1.5 text-[11px] rounded-pill px-3.5 py-1.5 whitespace-nowrap transition-all"
+                  style={chipStyle}
+                >
+                  {active ? `${radiusKm} km` : 'Distance'}
+                  <span style={{ fontSize: 9, opacity: 0.6 }}>▾</span>
+                </button>
+                {openFilter === 'distance' && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 300, background: 'var(--chalk)', border: '0.5px solid var(--borderS)', borderRadius: 'var(--r)', boxShadow: '0 8px 32px rgba(28,28,26,0.13)', padding: '16px 18px', minWidth: 220 }}>
+                    <p className="text-[10px] font-[500] uppercase tracking-[0.5px] mb-2" style={{ color: 'var(--muted)' }}>Distance</p>
+                    {!city.trim() && (
+                      <p className="text-[11px] mb-3" style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
+                        Entrez une ville dans la recherche pour filtrer par distance.
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {[5, 10, 20, 50, 100].map(km => {
+                        const sel = radiusKm === km
+                        return (
+                          <button key={km} type="button"
+                            onClick={() => { setRadiusKm(sel ? null : km); setOpenFilter(null) }}
+                            className="text-[11px] px-3 py-1.5 rounded-pill transition-all"
+                            style={sel ? { background: cfg.accentLight, color: cfg.accent, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' } : { background: 'var(--sand)', color: 'var(--cs)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }}
+                          >{km} km</button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* État — VENTE uniquement */}
+          {mode === 'VENTE' && (() => {
+            const active = !!selectedCondition
+            const chipStyle: React.CSSProperties = active
+              ? { color: cfg.accent, background: cfg.accentLight, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' }
+              : { color: 'var(--cs)', background: 'var(--sand)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }
+            return (
+              <div style={{ position: 'relative' }}>
+                <button type="button" onClick={() => setOpenFilter(openFilter === 'etat' ? null : 'etat')}
+                  className="flex items-center gap-1.5 text-[11px] rounded-pill px-3.5 py-1.5 whitespace-nowrap transition-all"
+                  style={chipStyle}
+                >
+                  {active ? CONDITIONS.find(c => c.value === selectedCondition)?.label : 'État'}
+                  <span style={{ fontSize: 9, opacity: 0.6 }}>▾</span>
+                </button>
+                {openFilter === 'etat' && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 300, background: 'var(--chalk)', border: '0.5px solid var(--borderS)', borderRadius: 'var(--r)', boxShadow: '0 8px 32px rgba(28,28,26,0.13)', padding: '16px 18px', minWidth: 200 }}>
+                    <p className="text-[10px] font-[500] uppercase tracking-[0.5px] mb-3" style={{ color: 'var(--muted)' }}>État</p>
+                    <div className="flex flex-col gap-1">
+                      {CONDITIONS.map(cond => {
+                        const sel = selectedCondition === cond.value
+                        return (
+                          <button key={cond.value} type="button"
+                            onClick={() => { setSelectedCondition(sel ? '' : cond.value); setOpenFilter(null) }}
+                            className="text-left text-[12px] px-3 py-2 rounded-[var(--rs)] transition-all"
+                            style={sel ? { background: cfg.accentLight, color: cfg.accent, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' } : { background: 'none', color: 'var(--cs)', border: '0.5px solid transparent', cursor: 'pointer', fontFamily: 'inherit' }}
+                          >{cond.label}</button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Récent — DON uniquement */}
+          {mode === 'DON' && (
+            <button type="button" onClick={() => setRecentOnly(!recentOnly)}
+              className="flex items-center gap-1.5 text-[11px] rounded-pill px-3.5 py-1.5 whitespace-nowrap transition-all"
+              style={recentOnly
+                ? { color: cfg.accent, background: cfg.accentLight, border: `0.5px solid ${cfg.accent}44`, cursor: 'pointer', fontFamily: 'inherit' }
+                : { color: 'var(--cs)', background: 'var(--sand)', border: '0.5px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {recentOnly ? '✓ ' : ''}Publiés récemment
+            </button>
+          )}
+
+          {/* Effacer tous */}
+          {(priceMin || priceMax || selectedCategory || radiusKm || selectedCondition || recentOnly) && (
+            <button type="button" onClick={clearFilters}
+              className="text-[11px] px-3 py-1.5"
+              style={{ color: 'var(--muted)', cursor: 'pointer', background: 'none', border: 'none', fontFamily: 'inherit' }}
+            >
+              × Effacer les filtres
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ─── CATEGORIES ─── */}

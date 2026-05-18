@@ -22,24 +22,45 @@ const createListingSchema = z.object({
   longitude: z.number().optional(),
 })
 
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const mode = searchParams.get('mode') as Mode | null
   const category = searchParams.get('category') as Category | null
   const city = searchParams.get('city')
   const search = searchParams.get('search')
+  const priceMin = searchParams.get('priceMin')
+  const priceMax = searchParams.get('priceMax')
+  const radius = searchParams.get('radius')
+  const condition = searchParams.get('condition')
+  const recent = searchParams.get('recent') // nb de jours
   const page = parseInt(searchParams.get('page') || '1', 10)
   const limit = parseInt(searchParams.get('limit') || '12', 10)
 
   const where: Record<string, unknown> = { status: 'ACTIVE' }
 
-  if (mode && ['VENTE', 'TROC', 'DON'].includes(mode)) {
-    where.mode = mode
+  if (mode && ['VENTE', 'TROC', 'DON'].includes(mode)) where.mode = mode
+  if (category) where.category = category
+  if (condition) where.condition = condition
+  if (recent) {
+    const days = parseInt(recent, 10)
+    where.createdAt = { gte: new Date(Date.now() - days * 86400000) }
   }
-  if (category) {
-    where.category = category
+  if (priceMin || priceMax) {
+    const priceFilter: Record<string, number> = {}
+    if (priceMin) priceFilter.gte = parseFloat(priceMin)
+    if (priceMax) priceFilter.lte = parseFloat(priceMax)
+    where.price = priceFilter
   }
-  if (city) {
+  if (city && !radius) {
     where.city = { contains: city, mode: 'insensitive' }
   }
   if (search) {
@@ -50,16 +71,49 @@ export async function GET(request: NextRequest) {
   }
 
   const skip = (page - 1) * limit
+  const userInclude = { user: { select: { id: true, name: true, image: true, city: true, createdAt: true } } }
 
   try {
+    // Filtre par distance géographique
+    if (radius && city) {
+      let geoLat: number | null = null
+      let geoLng: number | null = null
+      try {
+        const geoRes = await fetch(
+          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city)}&type=municipality&limit=1`
+        )
+        const geoData = await geoRes.json()
+        const feat = geoData.features?.[0]
+        if (feat) {
+          geoLng = feat.geometry.coordinates[0]
+          geoLat = feat.geometry.coordinates[1]
+        }
+      } catch { /* géocodage échoué, on ignore la distance */ }
+
+      if (geoLat !== null && geoLng !== null) {
+        const km = parseFloat(radius)
+        const all = await prisma.listing.findMany({
+          where,
+          include: userInclude,
+          orderBy: { createdAt: 'desc' },
+          take: 800,
+        })
+        const filtered = all.filter(l =>
+          l.latitude != null && l.longitude != null &&
+          haversineKm(geoLat!, geoLng!, l.latitude, l.longitude) <= km
+        )
+        const total = filtered.length
+        const items = filtered.slice(skip, skip + limit)
+        return NextResponse.json({ items, total, page, totalPages: Math.ceil(total / limit) })
+      }
+      // Si géocodage échoué, on tombe sur la requête normale sans filtre distance
+      where.city = { contains: city, mode: 'insensitive' }
+    }
+
     const [items, total] = await Promise.all([
       prisma.listing.findMany({
         where,
-        include: {
-          user: {
-            select: { id: true, name: true, image: true, city: true, createdAt: true },
-          },
-        },
+        include: userInclude,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -67,12 +121,7 @@ export async function GET(request: NextRequest) {
       prisma.listing.count({ where }),
     ])
 
-    return NextResponse.json({
-      items,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    })
+    return NextResponse.json({ items, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
     console.error('GET /api/annonces error:', err)
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 })
