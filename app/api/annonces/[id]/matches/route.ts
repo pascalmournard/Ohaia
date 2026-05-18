@@ -52,9 +52,12 @@ export async function GET(
 
   const candidates = await prisma.listing.findMany({
     where: {
-      mode: 'TROC',
       status: 'ACTIVE',
       NOT: { id: params.id },
+      OR: [
+        { mode: 'TROC' },
+        { mode: 'VENTE', acceptsTrade: true, tradeFor: { not: null } },
+      ],
     },
     include: {
       user: { select: { id: true, name: true, image: true, city: true, createdAt: true } },

@@ -8,9 +8,10 @@ import { timeAgo, formatPrice } from '@/lib/utils'
 import type { Listing } from '@/types'
 
 const MODE_ACCENT: Record<string, { color: string; light: string; label: string }> = {
-  VENTE: { color: '#2D4A3E', light: '#E8F0ED', label: 'Vente' },
-  TROC:  { color: '#4A3520', light: '#F0EBE3', label: 'Troc' },
-  DON:   { color: '#2A3D52', light: '#E5ECF4', label: 'Don' },
+  VENTE:        { color: '#2D4A3E', light: '#E8F0ED', label: 'Vente' },
+  VENTE_ECHANGE:{ color: '#2D4A3E', light: '#E8F0ED', label: 'Vente · Échange' },
+  TROC:         { color: '#4A3520', light: '#F0EBE3', label: 'Troc' },
+  DON:          { color: '#2A3D52', light: '#E5ECF4', label: 'Don' },
 }
 
 interface AnnonceCardProps {
@@ -19,7 +20,8 @@ interface AnnonceCardProps {
 }
 
 export default function AnnonceCard({ listing, initialFavorited = false }: AnnonceCardProps) {
-  const mode = MODE_ACCENT[listing.mode] ?? MODE_ACCENT.VENTE
+  const modeKey = listing.mode === 'VENTE' && (listing as any).acceptsTrade ? 'VENTE_ECHANGE' : listing.mode
+  const mode = MODE_ACCENT[modeKey] ?? MODE_ACCENT.VENTE
   const coverImage = listing.images[0]
   const [imgFailed, setImgFailed] = useState(false)
   const [favorited, setFavorited] = useState(initialFavorited)

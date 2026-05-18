@@ -121,6 +121,7 @@ export default function PublishForm() {
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [negotiable, setNegotiable] = useState(false)
+  const [acceptsTrade, setAcceptsTrade] = useState(false)
   const [coords, setCoords] = useState<{ lat?: number; lng?: number }>({})
 
   const {
@@ -215,7 +216,8 @@ export default function PublishForm() {
         category: data.category,
         condition: data.condition,
         price: data.mode === 'VENTE' && data.price ? parseFloat(data.price) : undefined,
-        tradeFor: data.mode === 'TROC' ? data.tradeFor : undefined,
+        tradeFor: (data.mode === 'TROC' || (data.mode === 'VENTE' && acceptsTrade)) ? data.tradeFor : undefined,
+        acceptsTrade: data.mode === 'VENTE' ? acceptsTrade : false,
         images: imageUrls,
         city: data.city,
         latitude: coords.lat,
@@ -473,6 +475,60 @@ export default function PublishForm() {
                     Négociable
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Ouvert à l'échange — VENTE */}
+            {selectedMode === 'VENTE' && (
+              <div style={sectionStyle}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-[500] uppercase tracking-[0.6px]" style={{ color: 'var(--muted)' }}>
+                      Ouvert à l&apos;échange
+                    </p>
+                    <p className="text-[12px] mt-0.5" style={{ color: 'var(--muted)' }}>
+                      Acceptez-vous un troc partiel ou total en plus du prix ?
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAcceptsTrade(!acceptsTrade)}
+                    style={{
+                      width: 44, height: 24, borderRadius: 999,
+                      background: acceptsTrade ? accent : 'var(--borderS)',
+                      border: 'none', cursor: 'pointer', position: 'relative',
+                      flexShrink: 0, transition: 'background 0.2s',
+                    }}
+                  >
+                    <span style={{
+                      position: 'absolute', top: 3,
+                      left: acceptsTrade ? 23 : 3,
+                      width: 18, height: 18, borderRadius: '50%',
+                      background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      transition: 'left 0.2s',
+                    }} />
+                  </button>
+                </div>
+                {acceptsTrade && (
+                  <div className="mt-4 pt-4" style={{ borderTop: '0.5px solid var(--border)' }}>
+                    <label className="block text-[12px] font-[500] mb-1.5" style={{ color: 'var(--cs)' }}>
+                      Ce que j&apos;accepte en échange
+                    </label>
+                    <input
+                      {...register('tradeFor')}
+                      placeholder="Ex : vélo, appareil photo, livres…"
+                      style={{
+                        width: '100%', background: 'var(--chalk)',
+                        border: '0.5px solid var(--borderS)', borderRadius: 'var(--rs)',
+                        padding: '10px 14px', fontFamily: 'inherit', fontSize: 13,
+                        color: 'var(--charcoal)', outline: 'none',
+                      }}
+                    />
+                    <p className="text-[11px] mt-1.5" style={{ color: 'var(--muted)' }}>
+                      Votre annonce apparaîtra aussi dans la section Troc et activera le matching d&apos;échanges.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

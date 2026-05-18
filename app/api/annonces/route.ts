@@ -16,6 +16,7 @@ const createListingSchema = z.object({
   condition: z.enum(['NEUF', 'TRES_BON', 'BON', 'ACCEPTABLE', 'POUR_PIECES']),
   price: z.number().min(0).optional(),
   tradeFor: z.string().max(200).optional(),
+  acceptsTrade: z.boolean().optional().default(false),
   images: z.array(z.string()).max(8).optional().default([]),
   city: z.string().min(1).max(100),
   latitude: z.number().optional(),
@@ -47,7 +48,17 @@ export async function GET(request: NextRequest) {
 
   const where: Record<string, unknown> = { status: 'ACTIVE' }
 
-  if (mode && ['VENTE', 'TROC', 'DON'].includes(mode)) where.mode = mode
+  if (mode && ['VENTE', 'TROC', 'DON'].includes(mode)) {
+    if (mode === 'TROC') {
+      // Inclure aussi les annonces VENTE ouvertes à l'échange
+      where.OR = [
+        { mode: 'TROC' },
+        { mode: 'VENTE', acceptsTrade: true, tradeFor: { not: null } },
+      ]
+    } else {
+      where.mode = mode
+    }
+  }
   if (category) where.category = category
   if (condition) where.condition = condition
   if (recent) {
@@ -146,7 +157,8 @@ export async function POST(request: NextRequest) {
         category: data.category as Category,
         condition: data.condition as Condition,
         price: data.mode === 'VENTE' ? data.price : undefined,
-        tradeFor: data.mode === 'TROC' ? data.tradeFor : undefined,
+        tradeFor: (data.mode === 'TROC' || (data.mode === 'VENTE' && data.acceptsTrade)) ? data.tradeFor : undefined,
+        acceptsTrade: data.mode === 'VENTE' ? (data.acceptsTrade ?? false) : false,
         images: data.images,
         city: data.city,
         latitude: data.latitude,

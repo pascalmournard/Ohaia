@@ -127,6 +127,7 @@ export default function EditForm({ listing }: Props) {
       }
       if (listing.mode === 'VENTE') {
         payload.price = data.price ? parseFloat(data.price) : null
+        payload.acceptsTrade = acceptTrade
         payload.tradeFor = acceptTrade ? (data.tradeFor || null) : null
       }
       if (listing.mode === 'TROC') {

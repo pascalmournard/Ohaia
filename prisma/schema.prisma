@@ -106,8 +106,9 @@ model Listing {
   mode        Mode
   category    Category
   condition   Condition
-  price       Float?
-  tradeFor    String?
+  price        Float?
+  tradeFor     String?
+  acceptsTrade Boolean @default(false)
   images      String[]
   city        String
   latitude    Float?
