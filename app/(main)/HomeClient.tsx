@@ -142,10 +142,16 @@ function cardTint(id: string): string {
   return TINTS[hash % TINTS.length]
 }
 
+function cardDelay(id: string): string {
+  const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  return `${((hash % 12) * 0.4).toFixed(1)}s`
+}
+
 function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
   const cfg = MODE_CONFIG[mode]
   const image = listing.images?.[0]
   const tint = cardTint(listing.id)
+  const delay = cardDelay(listing.id)
 
   return (
     <Link
@@ -168,8 +174,13 @@ function ListingCard({ listing, mode }: { listing: Listing; mode: Mode }) {
           <span style={{ opacity: 0.25 }}>□</span>
         )}
         <div
-          className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0"
-          style={{ background: tint }}
+          className="absolute inset-0 group-hover:opacity-0"
+          style={{
+            background: tint,
+            animation: `veil-wave 4s ease-in-out infinite`,
+            animationDelay: delay,
+            transition: 'opacity 0.4s ease',
+          }}
         />
       </div>
       <div className="p-3.5">
