@@ -249,7 +249,10 @@ export default function HomeClient({ listings }: { listings: Listing[] }) {
     )
   }
 
-  const filtered = listings.filter((l) => l.mode === mode)
+  const filtered = listings.filter((l) => {
+    if (mode === 'TROC') return l.mode === 'TROC' || (l.mode === 'VENTE' && (l as any).acceptsTrade)
+    return l.mode === mode
+  })
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
